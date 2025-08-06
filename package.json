@@ -1,0 +1,31 @@
+{
+  "name": "finboard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "watch:css": "tailwindcss -i ./src/input.css -o ./core/static/core/css/output.css --watch",
+    "watch:js": "esbuild ./src/main.js --bundle --outfile=./core/static/core/js/main.bundle.js --watch",
+    "dev": "concurrently \"npm:watch:*\"",
+    "build:css": "tailwindcss -i ./src/input.css -o ./core/static/core/css/output.css --minify",
+    "build:js": "esbuild ./src/main.js --bundle --minify --outfile=./core/static/core/js/main.bundle.js",
+    "build": "npm run build:css && npm run build:js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bobdreads/FinBoard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/bobdreads/FinBoard/issues"
+  },
+  "homepage": "https://github.com/bobdreads/FinBoard#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "esbuild": "^0.25.8",
+    "tailwindcss": "^4.1.11"
+  }
+}

@@ -1,0 +1,19 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>FinBoard</title>
+    <link href="{% static 'core/css/output.css' %}" rel="stylesheet">
+</head>
+<body>
+    <h1 class="p-4 text-center text-4xl font-bold text-cyan-500">
+        FinBoard Rodando com Tailwind!
+    </h1>
+
+    {% block content %}
+    {% endblock %}
+    
+    <script src="{% static 'core/js/main.bundle.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+console.log("JavaScript do FinBoard carregado com sucesso! 🚀");
