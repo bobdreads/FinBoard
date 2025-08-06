@@ -1,2 +1,16 @@
-.venv
-node_modules
+# Ambiente Virtual
+.venv/
+venv/
+
+# Arquivos de cache do Python
+__pycache__/
+*.pyc
+
+# Banco de dados de desenvolvimento
+db.sqlite3
+
+# Arquivos de dependências do Node.js
+node_modules/
+
+# Arquivos de ambiente (ver próximo item)
+.env
