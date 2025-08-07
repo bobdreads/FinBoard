@@ -126,3 +126,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Dash
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+# Para onde o usuário é redirecionado após o login com sucesso.
+# 'core:home' é o nome da nossa URL da página inicial.
+LOGIN_REDIRECT_URL = 'core:home'
+
+# Para onde o usuário é redirecionado quando uma página exige login
+# e ele não está logado.
+LOGIN_URL = 'core:login'
+
+# Para onde o usuário é redirecionado após o logout.
+# (Opcional, se não definido, vai para a página de admin de logout)
+LOGOUT_REDIRECT_URL = 'core:login'

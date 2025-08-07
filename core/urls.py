@@ -1,10 +1,17 @@
-from django.urls import path
-from . import views  # Importa as views do app core
+# Em core/urls.py (crie este arquivo se não existir)
 
-app_name = 'core'  # Boa prática para organizar as URLs
+from django.urls import path
+from django.contrib.auth import views as auth_views
+from . import views
+
+app_name = 'core'
 
 urlpatterns = [
-    # Quando a URL estiver "vazia" (ex: http://127.0.0.1:8000/),
-    # chame a view 'home'.
+    # Rota da nossa página inicial
     path('', views.home, name='home'),
+
+    # --- ROTAS DE AUTENTICAÇÃO ---
+    path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('cadastro/', views.register, name='register'),
 ]

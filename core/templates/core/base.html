@@ -1,19 +1,41 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" class="dark">
 <head>
     <meta charset="UTF-8">
-    <title>FinBoard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinBoard - Seu Diário de Trades</title>
     <link href="{% static 'core/css/output.css' %}" rel="stylesheet">
 </head>
-<body>
-    <h1 class="p-4 text-center text-4xl font-bold text-cyan-500">
-        FinBoard Rodando com Tailwind!
-    </h1>
+<body class="bg-gray-900">
 
-    {% block content %}
-    {% endblock %}
+    <header class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <a href="{% url 'core:home' %}" class="text-white text-2xl font-bold hover:text-indigo-400 transition-colors">
+                    FinBoard 🚀
+                </a>
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        <span class="text-gray-300">Olá, {{ user.username }}!</span>
+                        <a href="{% url 'core:login' %}" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
+                            Sair
+                        </a>
+                    {% else %}
+                        <a href="{% url 'core:login' %}" class="text-gray-300 hover:text-white transition-colors">Login</a>
+                        <a href="{% url 'core:register' %}" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">
+                            Cadastre-se
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
     
-    <script src="{% static 'core/js/main.bundle.js' %}"></script>
+    <script src="{% static 'js/main.bundle.js' %}"></script>
 </body>
 </html>
