@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from decimal import Decimal
 from .models import Account, Transaction
 from .forms import AccountForm, TransactionForm
 
@@ -45,20 +46,28 @@ def account_create(request):
 @login_required
 def account_detail(request, pk):
     """
-    Exibe os detalhes de uma conta específica, incluindo seu histórico de transações.
-    O 'pk' (primary key) é o ID da conta que vem da URL.
+    Exibe os detalhes de uma conta específica, incluindo seu histórico de transações com saldo corrente.
     """
-    # Usamos get_object_or_404 para buscar a conta. Se não encontrar,
-    # ele automaticamente retorna um erro 404 (Página não encontrada).
-    # O filtro "user=request.user" garante que um usuário não possa ver a conta de outro.
     account = get_object_or_404(Account, pk=pk, user=request.user)
 
-    # Buscamos todas as transações associadas a esta conta
-    transactions = account.transactions.order_by('-date')
+    # Busca as transações em ordem cronológica para o cálculo
+    transactions_list = list(account.transactions.order_by('date', 'pk'))
+
+    # Calcula o saldo corrente
+    balance = account.initial_balance
+    for tx in transactions_list:
+        if tx.type == 'DEPOSITO':
+            balance += tx.amount
+        elif tx.type == 'SAQUE':
+            balance -= tx.amount
+        tx.running_balance = balance  # Atribui o saldo calculado ao objeto
+
+    # Inverte a lista para exibir a mais recente primeiro
+    transactions_list.reverse()
 
     context = {
         'account': account,
-        'transactions': transactions,
+        'transactions': transactions_list,
     }
     return render(request, 'dashboard/account_detail.html', context)
 

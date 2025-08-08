@@ -19,7 +19,7 @@
                 + Nova Transação
             </a>
         </div>
-        <div class="overflow-x-auto">
+        <div <div class="overflow-x-auto">
             <table class="min-w-full text-sm text-left text-gray-300">
                 <thead class="text-xs text-gray-400 uppercase bg-gray-700/50">
                     <tr>
@@ -27,6 +27,7 @@
                         <th scope="col" class="px-6 py-3">Tipo</th>
                         <th scope="col" class="px-6 py-3">Descrição</th>
                         <th scope="col" class="px-6 py-3 text-right">Valor</th>
+                        <th scope="col" class="px-6 py-3 text-right">Saldo Corrente</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -44,10 +45,13 @@
                         <td class="px-6 py-4 text-right font-mono {% if tx.type == 'DEPOSITO' %}text-green-400{% else %}text-red-400{% endif %}">
                             {{ tx.amount|format_currency:account.currency }}
                         </td>
+                        <td class="px-6 py-4 text-right font-mono text-gray-400">
+                            {{ tx.running_balance|format_currency:account.currency }}
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center py-10 text-gray-500">
+                        <td colspan="5" class="text-center py-10 text-gray-500">
                             Nenhuma transação registrada para esta carteira.
                         </td>
                     </tr>
