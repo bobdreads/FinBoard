@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from dashboard.models import Operation
 from .forms import SignUpForm
 
 # Create your views here.
@@ -11,7 +12,12 @@ def home(request):
     """
     Esta view renderiza a página inicial do projeto.
     """
-    return render(request, 'core/base.html')
+    operations = Operation.objects.filter(user=request.user)
+    context = {
+        'operations': operations
+    }
+
+    return render(request, 'core/home.html', context)
 
 
 def register(request):
