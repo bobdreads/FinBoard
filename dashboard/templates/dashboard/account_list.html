@@ -14,20 +14,22 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for account in accounts %}
-        <div class="bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col justify-between hover:border-indigo-500 border-2 border-transparent transition-all">
-            <div>
-                <h3 class="font-bold text-xl text-white">{{ account.name }}</h3>
-                <span class="text-xs font-medium px-2 py-1 rounded-full {% if account.is_active %}bg-green-500/20 text-green-400{% else %}bg-gray-600 text-gray-400{% endif %}">
-                    {% if account.is_active %}Ativa{% else %}Inativa{% endif %}
-                </span>
+        <a href="{% url 'dashboard:account_detail' pk=account.pk %}" class="block">
+            <div class="bg-gray-800 rounded-xl shadow-lg p-6 h-full flex flex-col justify-between hover:border-indigo-500 border-2 border-transparent transition-all">
+                <div>
+                    <h3 class="font-bold text-xl text-white">{{ account.name }}</h3>
+                    <span class="text-xs font-medium px-2 py-1 rounded-full {% if account.is_active %}bg-green-500/20 text-green-400{% else %}bg-gray-600 text-gray-400{% endif %}">
+                        {% if account.is_active %}Ativa{% else %}Inativa{% endif %}
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <p class="text-sm text-gray-400">Saldo Atual</p>
+                    <p class="text-3xl font-mono font-bold text-indigo-400">
+                        {{ account.current_balance|format_currency:account.currency }}
+                    </p>
+                </div>
             </div>
-            <div class="mt-4">
-                <p class="text-sm text-gray-400">Saldo Atual</p>
-                <p class="text-3xl font-mono font-bold text-indigo-400">
-                    {{ account.current_balance|format_currency:account.currency }}
-                </p>
-            </div>
-        </div>
+        </a>
         {% empty %}
         <div class="col-span-full bg-gray-800 rounded-xl p-10 text-center">
             <p class="text-gray-400">Você ainda não tem nenhuma carteira cadastrada.</p>

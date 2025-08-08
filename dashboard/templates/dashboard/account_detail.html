@@ -1,0 +1,60 @@
+{% extends 'core/base.html' %}
+{% load currency_filters %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <div class="mb-8">
+        <a href="{% url 'dashboard:account_list' %}" class="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">&larr; Voltar para todas as carteiras</a>
+        <h1 class="text-3xl font-bold text-white mt-2">{{ account.name }}</h1>
+        <p class="mt-1 text-lg text-gray-400">Saldo atual: 
+            <span class="font-bold text-white">{{ account.current_balance|format_currency:account.currency }}</span>
+        </p>
+    </div>
+
+    <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
+        <div class="flex justify-between items-center px-6 py-4 border-b border-gray-700">
+            <h3 class="text-lg font-semibold text-white">Histórico de Transações</h3>
+            <a href="{% url 'dashboard:transaction_add' account_pk=account.pk %}" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">
+                + Nova Transação
+            </a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-left text-gray-300">
+                <thead class="text-xs text-gray-400 uppercase bg-gray-700/50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">Data</th>
+                        <th scope="col" class="px-6 py-3">Tipo</th>
+                        <th scope="col" class="px-6 py-3">Descrição</th>
+                        <th scope="col" class="px-6 py-3 text-right">Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in transactions %}
+                    <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">{{ tx.date|date:"d/m/Y H:i" }}</td>
+                        <td class="px-6 py-4">
+                            {% if tx.type == 'DEPOSITO' %}
+                                <span class="px-2 py-1 text-xs font-medium text-green-300 bg-green-900/50 rounded-full">{{ tx.get_type_display }}</span>
+                            {% else %}
+                                <span class="px-2 py-1 text-xs font-medium text-red-300 bg-red-900/50 rounded-full">{{ tx.get_type_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">{{ tx.description|default:"-" }}</td>
+                        <td class="px-6 py-4 text-right font-mono {% if tx.type == 'DEPOSITO' %}text-green-400{% else %}text-red-400{% endif %}">
+                            {{ tx.amount|format_currency:account.currency }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-10 text-gray-500">
+                            Nenhuma transação registrada para esta carteira.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
