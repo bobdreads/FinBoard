@@ -3,11 +3,12 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
-    # ADICIONE ESTA LINHA:
-    # Ela conecta as URLs internas que o django-plotly-dash precisa para funcionar.
     path('django_plotly_dash/', include('django_plotly_dash.urls')),
 
-    # A rota para o nosso app 'core' continua a mesma
+    # Rota para o app 'core'
     path('', include('core.urls', namespace='core')),
+
+    # ADICIONE ESTA LINHA:
+    # Conecta as URLs do app dashboard ao nosso projeto
+    path('dashboard/', include('dashboard.urls', namespace='dashboard')),
 ]

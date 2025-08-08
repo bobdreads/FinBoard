@@ -1,5 +1,3 @@
-# Em dashboard/admin.py
-
 from django.contrib import admin
 # Importe os novos modelos aqui!
 from .models import (
@@ -15,6 +13,8 @@ class AccountAdmin(admin.ModelAdmin):
     list_display = ('name', 'user', 'currency', 'initial_balance', 'is_active')
     list_filter = ('currency', 'is_active', 'user')
     search_fields = ('name',)
+    # Adicionando a capacidade de editar transações diretamente da conta
+    # inlines = [TransactionInline] # Descomente quando criarmos o Inline
 
 
 @admin.register(Transaction)

@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
+# Importe F para referenciar campos
+from django.db.models import Sum, Case, When, F
+from decimal import Decimal  # Importe Decimal para cálculos precisos
 
 # --- NOVOS MODELOS ---
 
@@ -19,6 +22,36 @@ class Account(models.Model):
     initial_balance = models.DecimalField(
         "Saldo Inicial", max_digits=12, decimal_places=2, default=0.0)
     is_active = models.BooleanField("Ativa", default=True)
+
+    @property
+    def current_balance(self):
+        """Calcula o saldo atual dinamicamente."""
+        # 1. Começa com o saldo inicial
+        balance = self.initial_balance
+
+        # 2. Processa depósitos e saques
+        # Usamos Case/When para somar depósitos e subtrair saques
+        transaction_total = self.transactions.aggregate(
+            total=Sum(
+                Case(
+                    When(type='DEPOSITO', then='amount'),
+                    When(type='SAQUE', then=F('amount') * -1),
+                    default=Decimal('0.0'),
+                    output_field=models.DecimalField()
+                )
+            )
+        )['total'] or Decimal('0.00')
+
+        balance += transaction_total
+
+        # 3. Adiciona o resultado líquido das operações fechadas
+        operations_pl = self.operation_set.filter(status='FECHADA').aggregate(
+            total_pl=Sum('net_financial_result')
+        )['total_pl'] or Decimal('0.00')
+
+        balance += operations_pl
+
+        return round(balance, 2)
 
     def __str__(self):
         return f"{self.name} ({self.user.username})"
