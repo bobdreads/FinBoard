@@ -5,7 +5,7 @@ from django.forms import inlineformset_factory
 from django.db import transaction, IntegrityError
 from django.db.models import Sum, Count, Avg, Max, Min, F, ExpressionWrapper, fields
 from django.utils import timezone
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from .models import Account, Transaction, Operation, Strategy, Movement
 from .forms import AccountForm, TransactionForm, OperationForm, StrategyForm, MovementForm
@@ -317,9 +317,15 @@ def daily_summary(request):
         user=request.user,
         status='FECHADA',
         end_date__date=selected_date
-    )
+    ).order_by('end_date')
 
     # --- 1. CÁLCULO DOS KPIs ---
+    total_time_in_trades = timedelta()
+    max_drawdown = 0
+
+    # --- CÁLCULO DOS KPIs ---
+    daily_results_brl = [convert_to_brl(op.net_financial_result, op.account.currency, op.end_date)
+                         for op in daily_ops if op.net_financial_result is not None]
 
     # P/L Diário (com conversão de moeda)
     total_pl_day = sum(convert_to_brl(op.net_financial_result, op.account.currency, op.end_date)
@@ -340,6 +346,27 @@ def daily_summary(request):
     avg_result_day = sum(daily_results_brl) / \
         len(daily_results_brl) if daily_results_brl else 0
 
+    avg_result_day = round(avg_result_day, 2)
+
+    # 2. Drawdown Máximo do Dia (em BRL)
+    if daily_ops.exists():
+        # 1. Tempo Total Operando
+        for op in daily_ops:
+            if op.end_date and op.start_date:
+                total_time_in_trades += op.end_date - op.start_date
+
+        # 2. Drawdown Máximo do Dia (em BRL)
+        peak = 0
+        cumulative_pl = 0
+        for result in daily_results_brl:
+            cumulative_pl += result
+            if cumulative_pl > peak:
+                peak = cumulative_pl
+
+            drawdown = peak - cumulative_pl
+            if drawdown > max_drawdown:
+                max_drawdown = drawdown
+
     context = {
         'selected_date': selected_date,
         'date_str': date_str,  # Para preencher o seletor de data
@@ -348,7 +375,8 @@ def daily_summary(request):
         'trade_count_day': trade_count_day,
         'win_rate_day': win_rate_day,
         'avg_result_day': avg_result_day,
-        # Adicionaremos os outros KPIs aqui nos próximos passos
+        'total_time_in_trades': total_time_in_trades,
+        'max_drawdown': max_drawdown,
     }
 
     return render(request, 'dashboard/daily_summary.html', context)

@@ -14,9 +14,9 @@ window.renderEquityChart = function() {
 
     const myChart = echarts.init(chartDom);
 
-    let titleText = 'Curva de Patrimônio Acumulado (em BRL)';
+    let titleText = 'Curva de Resultado Total Acumulado (em BRL)';
     if (chartData.dates.length === 0) {
-        titleText = 'Curva de Patrimônio (Sem operações fechadas para exibir)';
+        titleText = 'Curva de Resultado Total Acumulado (Sem operações fechadas para exibir)';
     }
 
     const option = {

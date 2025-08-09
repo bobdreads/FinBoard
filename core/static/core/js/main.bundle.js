@@ -85556,9 +85556,9 @@
         }
         const chartData = JSON.parse(chartDataEl.textContent);
         const myChart = init2(chartDom);
-        let titleText = "Curva de Patrim\xF4nio Acumulado (em BRL)";
+        let titleText = "Curva de Resultado Total Acumulado (em BRL)";
         if (chartData.dates.length === 0) {
-          titleText = "Curva de Patrim\xF4nio (Sem opera\xE7\xF5es fechadas para exibir)";
+          titleText = "Curva de Resultado Total Acumulado (Sem opera\xE7\xF5es fechadas para exibir)";
         }
         const option = {
           title: { text: titleText, left: "center", textStyle: { color: "#e5e7eb" } },
