@@ -29,7 +29,6 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
 
     # Apps de terceiros
-    'django_plotly_dash',
 
     # Meus Apps
     'core',
@@ -119,7 +118,6 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'django_plotly_dash.finders.DashComponentFinder',  # Adicionado!
 ]
 
 STATICFILES_STORAGES = {
@@ -130,22 +128,6 @@ STATICFILES_STORAGES = {
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-
-# Dash
-X_FRAME_OPTIONS = 'SAMEORIGIN'
-
-PLOTLY_DASH = {
-    "serve_locally": True,
-}
-
-# Lista explícita de componentes para o DashComponentFinder inspecionar.
-PLOTLY_COMPONENTS = [
-    'dash',
-    'dash_bootstrap_components',
-    'dpd_components',
-    'dpd_static_support',
-]
 
 # --- CONFIGURAÇÃO DE AUTENTICAÇÃO E REDIRECIONAMENTO ---
 LOGIN_REDIRECT_URL = 'core:home'

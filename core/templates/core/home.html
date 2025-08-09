@@ -1,7 +1,16 @@
 {% extends 'core/base.html' %}
-{% load plotly_dash %}
+{% load currency_filters %}
+{% load static %}
 
-{% load currency_filters %}{% block content %}
+{% block title %}Dashboard - FinBoard{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.3.3/echarts.min.js"></script>
+    {{ form.media.css }}
+{% endblock %}
+
+{% block content %}
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <div class="mb-8">
@@ -26,9 +35,7 @@
         </div>
     </div>
     <div class="bg-gray-800 rounded-xl shadow-2xl p-4 mb-8">
-        <div class="w-full">
-            {% plotly_app name="EquityCurve" initial_arguments=dash_context.EquityCurve %}
-        </div>
+        <div id="equity-chart" style="width: 100%; height:400px;"></div>
     </div>
 
     <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
@@ -81,4 +88,13 @@
         </div>
     </div>
 </div>
+
+{{ chart_data|json_script:"chart-data-json" }}
+
+<script "type.text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        // A função renderEquityChart agora existe globalmente
+        renderEquityChart();
+    });
+</script>
 {% endblock %}
