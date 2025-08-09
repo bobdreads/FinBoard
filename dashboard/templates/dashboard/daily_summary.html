@@ -5,34 +5,43 @@
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="md:flex md:items-center md:justify-between mb-8">
         <div>
-            <h1 class="text-3xl font-bold text-white">Resumo do Dia</h1>
-            <p class="mt-1 text-lg text-gray-400">Análise de performance para <span class="text-indigo-400 font-semibold">{{ selected_date|date:"d/m/Y" }}</span></p>
+            <h1 class="text-3xl font-bold text-white">Resumo de Performance</h1>
+            <p class="mt-1 text-lg text-gray-400">
+                Analisando o período de 
+                <span class="text-indigo-400 font-semibold">{{ start_date|date:"d/m/Y" }}</span> até 
+                <span class="text-indigo-400 font-semibold">{{ end_date|date:"d/m/Y" }}</span>.
+            </p>
         </div>
-        <form method="get" class="flex items-center gap-2 mt-4 md:mt-0">
-            <input type="date" name="date" value="{{ date_str }}" class="bg-gray-700 border-gray-600 text-white rounded-lg p-2 text-sm">
-            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Analisar</button>
-        </form>
+        <div class="mb-8 p-4 bg-gray-800 rounded-xl">
+            <form method="get" class="flex flex-wrap items-center justify-end gap-2">
+                <label for="start_date" class="text-sm text-gray-300">De:</label>
+                <input type="date" name="start_date" id="start_date" value="{{ start_date|date:'Y-m-d' }}" class="bg-gray-700 border-gray-600 text-white rounded-lg p-1.5 text-sm w-40">
+                <label for="end_date" class="text-sm text-gray-300">Até:</label>
+                <input type="date" name="end_date" id="end_date" value="{{ end_date|date:'Y-m-d' }}" class="bg-gray-700 border-gray-600 text-white rounded-lg p-1.5 text-sm w-40">
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Analisar</button>
+            </form>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="bg-gray-800 rounded-xl shadow-lg p-6">
             <h3 class="text-sm font-medium text-gray-400">P/L do Dia (BRL)</h3>
-            <p class="text-3xl font-bold mt-2 font-mono {% if total_pl_day > 0 %}text-green-400{% elif total_pl_day < 0 %}text-red-400{% else %}text-gray-200{% endif %}">
-                {{ total_pl_day|format_currency:"BRL" }}
+            <p class="text-3xl font-bold mt-2 font-mono {% if total_pl_period > 0 %}text-green-400{% elif total_pl_period < 0 %}text-red-400{% else %}text-gray-200{% endif %}">
+                {{ total_pl_period|format_currency:"BRL" }}
             </p>
         </div>
         <div class="bg-gray-800 rounded-xl shadow-lg p-6">
             <h3 class="text-sm font-medium text-gray-400">Nº de Trades</h3>
-            <p class="text-3xl font-bold mt-2 text-white">{{ trade_count_day }}</p>
+            <p class="text-3xl font-bold mt-2 text-white">{{ trade_count_period }}</p>
         </div>
         <div class="bg-gray-800 rounded-xl shadow-lg p-6">
             <h3 class="text-sm font-medium text-gray-400">Taxa de Acerto</h3>
-            <p class="text-3xl font-bold mt-2 text-indigo-400">{{ win_rate_day|floatformat:1 }}%</p>
+            <p class="text-3xl font-bold mt-2 text-indigo-400">{{ win_rate_period|floatformat:1 }}%</p>
         </div>
         <div class="bg-gray-800 rounded-xl shadow-lg p-6">
             <h3 class="text-sm font-medium text-gray-400">Resultado Médio (BRL)</h3>
-            <p class="text-3xl font-bold mt-2 font-mono {% if avg_result_day > 0 %}text-green-400{% elif avg_result_day < 0 %}text-red-400{% else %}text-gray-200{% endif %}">
-                {{ avg_result_day|format_currency:"BRL" }}
+            <p class="text-3xl font-bold mt-2 font-mono {% if avg_result_period > 0 %}text-green-400{% elif avg_result_period < 0 %}text-red-400{% else %}text-gray-200{% endif %}">
+                {{ avg_result_period|format_currency:"BRL" }}
             </p>
         </div>
         <div class="bg-gray-800 rounded-xl shadow-lg p-6">
@@ -48,7 +57,7 @@
     </div>
 
     <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
-        <h3 class="px-6 py-4 text-lg font-semibold text-white border-b border-gray-700">Trades do Dia</h3>
+        <h3 class="px-6 py-4 text-lg font-semibold text-white border-b border-gray-700">Trades no Período ({{ period_ops.count }})</h3>
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm text-left text-gray-300">
                 <thead class="text-xs text-gray-400 uppercase bg-gray-700/50">
@@ -60,7 +69,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for op in daily_ops %}
+                    {% for op in period_ops %}
                     <tr class="border-b border-gray-700 hover:bg-gray-700/40">
                         <td class="px-6 py-4 font-medium text-white">{{ op.asset.ticker }}</td>
                         <td class="px-6 py-4">{{ op.get_initial_operation_type_display }}</td>
@@ -73,7 +82,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center py-10 text-gray-500">Nenhum trade fechado nesta data.</td>
+                        <td colspan="4" class="text-center py-10 text-gray-500">Nenhum trade fechado neste período.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

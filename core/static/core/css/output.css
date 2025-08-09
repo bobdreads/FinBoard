@@ -932,6 +932,10 @@ select {
   min-height: 100vh;
 }
 
+.w-40 {
+  width: 10rem;
+}
+
 .w-full {
   width: 100%;
 }
@@ -978,6 +982,10 @@ select {
 
 .flex-col {
   flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
 }
 
 .items-end {
@@ -1185,12 +1193,12 @@ select {
      object-fit: cover;
 }
 
-.p-10 {
-  padding: 2.5rem;
+.p-1\.5 {
+  padding: 0.375rem;
 }
 
-.p-2 {
-  padding: 0.5rem;
+.p-10 {
+  padding: 2.5rem;
 }
 
 .p-2\.5 {

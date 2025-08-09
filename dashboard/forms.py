@@ -2,19 +2,20 @@
 
 from django import forms
 from .models import Account, Transaction, Operation, Asset, Strategy, Tag, Movement
+from datetime import datetime
 
 # --- WIDGET PERSONALIZADO PARA CORRIGIR O PROBLEMA DA DATA ---
 
 
 class CustomDateTimeInput(forms.DateTimeInput):
-    """Widget para formatar a data/hora para o input datetime-local do HTML."""
     input_type = 'datetime-local'
 
     def format_value(self, value):
-        if value:
-            # O 'T' é o separador que o HTML exige
+        # VERIFICA se o valor é um objeto datetime antes de formatar
+        if isinstance(value, datetime):
             return value.strftime('%Y-%m-%dT%H:%M')
-        return None
+        # Se já for uma string (ao recarregar o form com erro), apenas a retorna
+        return value
 
 # --- FORMULÁRIOS DA APLICAÇÃO ---
 
@@ -38,6 +39,7 @@ class OperationForm(forms.ModelForm):
             'tags': forms.SelectMultiple(attrs={'class': 'h-40'}),
         }
 
+    # --- SUBSTITUA ESTE MÉTODO INTEIRO ---
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
@@ -45,13 +47,18 @@ class OperationForm(forms.ModelForm):
         if user:
             self.fields['account'].queryset = Account.objects.filter(user=user)
 
-        # TORNAMOS OS CAMPOS AUTOMÁTICOS APENAS LEITURA (DISABLED)
-        # Como eles estão na lista 'fields', esta operação agora é segura.
-        self.fields['start_date'].disabled = True
-        self.fields['end_date'].disabled = True
-        self.fields['status'].disabled = True
+        # --- A CORREÇÃO ESTÁ AQUI ---
+        # Tornamos os campos não-obrigatórios no formulário
+        self.fields['start_date'].required = False
+        self.fields['end_date'].required = False
+        self.fields['status'].required = False
 
-        # Campos opcionais
+        # Escondemos os campos do usuário, pois são automáticos
+        self.fields['start_date'].widget = forms.HiddenInput()
+        self.fields['end_date'].widget = forms.HiddenInput()
+        self.fields['status'].widget = forms.HiddenInput()
+
+        # O resto da lógica permanece
         self.fields['net_financial_result'].required = False
         self.fields['points_pips_result'].required = False
         self.fields['general_notes'].required = False
@@ -59,12 +66,9 @@ class OperationForm(forms.ModelForm):
 
         # Aplica classes de estilo
         default_classes = "bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5"
-        disabled_classes = "bg-gray-800 border-gray-700 text-gray-400 text-sm rounded-lg block w-full p-2.5 cursor-not-allowed"
-
         for field_name, field in self.fields.items():
-            if field.disabled:
-                field.widget.attrs['class'] = disabled_classes
-            else:
+            # Ignora os campos ocultos que não precisam de estilo
+            if not isinstance(field.widget, forms.HiddenInput):
                 field.widget.attrs['class'] = default_classes
 
 

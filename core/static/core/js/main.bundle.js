@@ -24720,23 +24720,6 @@
     lifecycle_default.trigger("afterinit", chart);
     return chart;
   }
-  function connect(groupId) {
-    if (isArray(groupId)) {
-      var charts = groupId;
-      groupId = null;
-      each(charts, function(chart) {
-        if (chart.group != null) {
-          groupId = chart.group;
-        }
-      });
-      groupId = groupId || "g_" + groupIdBase++;
-      each(charts, function(chart) {
-        chart.group = groupId;
-      });
-    }
-    connectedGroups[groupId] = true;
-    return groupId;
-  }
   function getInstanceByDom(dom) {
     return instances2[getAttribute(dom, DOM_ATTRIBUTE_KEY)];
   }
@@ -85565,68 +85548,37 @@
   var require_main = __commonJS({
     "src/main.js"() {
       init_echarts2();
-      window.renderDashboardCharts = function() {
-        const dailyPlDom = document.getElementById("daily-pl-chart");
-        const stackedAreaDom = document.getElementById("stacked-area-chart");
-        const dailyPlDataEl = document.getElementById("daily-pl-json");
-        const stackedAccountsDataEl = document.getElementById("stacked-accounts-json");
-        if (!dailyPlDom || !stackedAreaDom || !dailyPlDataEl || !stackedAccountsDataEl) {
+      window.renderEquityChart = function() {
+        const chartDom = document.getElementById("equity-chart");
+        const chartDataEl = document.getElementById("chart-data-json");
+        if (!chartDom || !chartDataEl) {
           return;
         }
-        const dailyPlData = JSON.parse(dailyPlDataEl.textContent);
-        const stackedAccountsData = JSON.parse(stackedAccountsDataEl.textContent);
-        const dailyPlChart = init2(dailyPlDom);
-        const stackedAreaChart = init2(stackedAreaDom);
-        const dailyPlOption = {
-          tooltip: { trigger: "axis" },
-          xAxis: { type: "category", data: dailyPlData.dates },
-          yAxis: { type: "value", splitLine: { lineStyle: { color: "#374151" } } },
-          grid: { left: "3%", right: "4%", bottom: "20%", containLabel: true },
-          backgroundColor: "rgba(0,0,0,0)",
-          dataZoom: [{
-            type: "inside",
-            start: 0,
-            end: 100
-          }, {
-            start: 0,
-            end: 100,
-            type: "slider",
-            bottom: 10,
-            height: 20
-          }],
+        const chartData = JSON.parse(chartDataEl.textContent);
+        const myChart = init2(chartDom);
+        let titleText = "Curva de Resultado Total Acumulado (em BRL)";
+        if (chartData.dates.length === 0) {
+          titleText = "Curva de Resultado Total Acumulado (Sem opera\xE7\xF5es fechadas para exibir)";
+        }
+        const option = {
+          title: { text: titleText, left: "center", textStyle: { color: "#e5e7eb" } },
+          tooltip: { trigger: "axis", backgroundColor: "rgba(31, 41, 55, 0.8)", borderColor: "#4b5563", textStyle: { color: "#d1d5db" } },
+          xAxis: { type: "category", data: chartData.dates, axisLine: { lineStyle: { color: "#6b7280" } } },
+          yAxis: { type: "value", axisLine: { lineStyle: { color: "#6b7280" } }, splitLine: { lineStyle: { color: "#374151" } } },
           series: [{
-            name: "P/L Di\xE1rio",
-            type: "bar",
-            data: dailyPlData.values.map((val) => ({
-              value: val,
-              itemStyle: { color: val >= 0 ? "#4ade80" : "#f87171" }
-              // verde ou vermelho
-            }))
-          }]
-        };
-        const stackedAreaOption = {
-          tooltip: { trigger: "axis", axisPointer: { type: "cross" } },
-          legend: { data: stackedAccountsData.series.map((s) => s.name), bottom: 0, textStyle: { color: "#d1d5db" } },
-          grid: { left: "3%", right: "4%", top: "10%", bottom: "15%", containLabel: true },
-          backgroundColor: "rgba(0,0,0,0)",
-          xAxis: { type: "category", boundaryGap: false, data: stackedAccountsData.dates },
-          yAxis: { type: "value", splitLine: { lineStyle: { color: "#374151" } } },
-          series: stackedAccountsData.series.map((s) => ({
-            name: s.name,
+            name: "Patrim\xF4nio",
+            data: chartData.values,
             type: "line",
-            stack: "Total",
-            areaStyle: {},
-            emphasis: { focus: "series" },
-            data: s.data
-          }))
+            smooth: true,
+            showSymbol: chartData.values.length < 50,
+            itemStyle: { color: "#818cf8" },
+            lineStyle: { color: "#6366f1", width: 2 }
+          }],
+          grid: { left: "3%", right: "4%", bottom: "3%", containLabel: true },
+          backgroundColor: "rgba(0,0,0,0)"
         };
-        dailyPlChart.setOption(dailyPlOption);
-        stackedAreaChart.setOption(stackedAreaOption);
-        connect([dailyPlChart, stackedAreaChart]);
-        window.addEventListener("resize", () => {
-          dailyPlChart.resize();
-          stackedAreaChart.resize();
-        });
+        myChart.setOption(option);
+        window.addEventListener("resize", () => myChart.resize());
       };
       console.log("JavaScript do FinBoard carregado com sucesso! \u{1F680}");
     }

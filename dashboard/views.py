@@ -53,28 +53,58 @@ def account_create(request):
 @login_required
 def account_detail(request, pk):
     """
-    Exibe os detalhes de uma conta específica, incluindo seu histórico de transações com saldo corrente.
+    Exibe o histórico de transações de uma conta com o saldo corrente
+    calculado corretamente, incluindo os resultados das operações.
     """
     account = get_object_or_404(Account, pk=pk, user=request.user)
 
-    # Busca as transações em ordem cronológica para o cálculo
-    transactions_list = list(account.transactions.order_by('date', 'pk'))
+    # 1. Coleta todos os eventos financeiros da conta
+    transactions = account.transactions.all()
+    closed_ops = account.operation_set.filter(
+        status='FECHADA', end_date__isnull=False)
 
-    # Calcula o saldo corrente
-    balance = account.initial_balance
-    for tx in transactions_list:
-        if tx.type == 'DEPOSITO':
-            balance += tx.amount
-        elif tx.type == 'SAQUE':
-            balance -= tx.amount
-        tx.running_balance = balance  # Atribui o saldo calculado ao objeto
+    # Cria uma lista unificada de eventos para cálculo
+    all_events = []
+    for t in transactions:
+        all_events.append({
+            'date': t.date,
+            'amount': t.amount if t.type == 'DEPOSITO' else -t.amount,
+            'is_transaction': True,  # Marca que este evento é uma transação
+            'object': t  # Guarda o objeto original da transação
+        })
+
+    for op in closed_ops:
+        if op.net_financial_result is not None:
+            all_events.append({
+                'date': op.end_date,
+                'amount': op.net_financial_result,
+                'is_transaction': False  # Marca que não é uma transação
+            })
+
+    # 2. Ordena todos os eventos cronologicamente
+    all_events.sort(key=lambda x: x['date'])
+
+    # 3. Calcula o saldo corrente para cada evento e armazena nas transações
+    running_balance = account.initial_balance
+    transactions_with_balance = []
+
+    for event in all_events:
+        running_balance += event['amount']
+        # Se o evento for uma transação, nós guardamos o saldo calculado
+        if event['is_transaction']:
+            transaction_obj = event['object']
+            transaction_obj.running_balance = running_balance  # Anexa o saldo ao objeto
+            transactions_with_balance.append(transaction_obj)
+
+    # A lista `transactions_with_balance` agora contém apenas as transações,
+    # mas cada uma tem um novo atributo `.running_balance` com o valor correto.
 
     # Inverte a lista para exibir a mais recente primeiro
-    transactions_list.reverse()
+    transactions_with_balance.reverse()
 
     context = {
         'account': account,
-        'transactions': transactions_list,
+        'transactions': transactions_with_balance,
     }
     return render(request, 'dashboard/account_detail.html', context)
 
@@ -202,17 +232,11 @@ def operation_detail(request, pk):
 @login_required
 def operation_update(request, pk):
     """
-    Atualiza uma operação existente e seus movimentos.
+    Atualiza uma operação existente e seus movimentos. (VERSÃO CORRIGIDA)
     """
     operation = get_object_or_404(Operation, pk=pk, user=request.user)
-
     MovementFormSet = inlineformset_factory(
-        Operation,
-        Movement,
-        form=MovementForm,
-        extra=0,  # CORREÇÃO: Não adicionar formulários extras ao editar
-        can_delete=True  # Permite que o usuário marque movimentos para exclusão
-    )
+        Operation, Movement, form=MovementForm, extra=0, can_delete=True)
 
     if request.method == 'POST':
         form = OperationForm(
@@ -220,18 +244,51 @@ def operation_update(request, pk):
         formset = MovementFormSet(request.POST, instance=operation)
 
         if form.is_valid() and formset.is_valid():
-            try:
-                with transaction.atomic():
-                    form.save()
-                    formset.save()
-                    # A lógica de recálculo no model Movement cuidará de atualizar o status
-                    operation.update_calculated_fields()
-                    return redirect('dashboard:operation_detail', pk=operation.pk)
-            except IntegrityError as e:
-                print(f"Erro de Integridade na atualização: {e}")
+            # --- LÓGICA DE CORREÇÃO ---
+            # 1. Pega os dados de todos os movimentos que serão salvos (novos e existentes)
+            #    e que не estão marcados para exclusão.
+            valid_movements_data = [
+                f.cleaned_data for f in formset
+                if f.has_changed() and not f.cleaned_data.get('DELETE', False)
+            ]
+
+            # Pega os movimentos já existentes que não foram alterados
+            existing_movements_data = [
+                {'datetime': mov.initial['datetime']} for mov in formset.initial_forms
+                if not mov.has_changed() and not mov.cleaned_data.get('DELETE', False)
+            ]
+
+            all_movements_data = valid_movements_data + existing_movements_data
+
+            if not all_movements_data:
+                form.add_error(
+                    None, "Uma operação deve ter pelo menos um movimento.")
+            else:
+                # 2. Encontra a data mais antiga entre todos os movimentos
+                earliest_date = min(
+                    data['datetime'] for data in all_movements_data if data.get('datetime'))
+
+                try:
+                    with transaction.atomic():
+                        # 3. Salva o formulário principal (ainda sem commit)
+                        updated_operation = form.save(commit=False)
+                        # 4. Atribui a data correta ANTES de salvar no banco
+                        updated_operation.start_date = earliest_date
+                        updated_operation.save()
+                        form.save_m2m()
+
+                        # 5. Salva os movimentos
+                        formset.instance = updated_operation
+                        formset.save()
+
+                        # A lógica de recálculo no model Movement cuidará de atualizar o status/end_date
+                        updated_operation.update_calculated_fields()
+
+                        return redirect('dashboard:operation_detail', pk=operation.pk)
+                except IntegrityError as e:
+                    print(f"Erro de Integridade na atualização: {e}")
         else:
             print("Erros de Validação:", form.errors, formset.errors)
-
     else:
         form = OperationForm(instance=operation, user=request.user)
         formset = MovementFormSet(instance=operation)
@@ -241,7 +298,6 @@ def operation_update(request, pk):
         'formset': formset,
         'operation': operation,
     }
-    # Usaremos o mesmo template do formulário de criação, mas o contexto o adaptará
     return render(request, 'dashboard/operation_form.html', context)
 
 
@@ -306,75 +362,63 @@ def strategy_delete(request, pk):
 @login_required
 def daily_summary(request):
     """
-    Exibe um resumo de performance para um dia específico.
+    Exibe um resumo de performance para um período de tempo selecionado. (VERSÃO SIMPLIFICADA)
     """
-    # Pega a data do request (via GET), ou usa a data de hoje como padrão
-    date_str = request.GET.get('date', timezone.now().strftime('%Y-%m-%d'))
-    selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    today = timezone.now().date()
 
-    # Filtra operações fechadas NAQUELE DIA para o usuário logado
-    daily_ops = Operation.objects.filter(
+    # --- LÓGICA DE DATAS SIMPLIFICADA ---
+    # Pega as datas do request, ou usa a data de hoje como padrão para ambas
+    start_date_str = request.GET.get('start_date', today.strftime('%Y-%m-%d'))
+    end_date_str = request.GET.get('end_date', today.strftime('%Y-%m-%d'))
+
+    start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+    end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+
+    # Filtra operações fechadas no intervalo
+    period_ops = Operation.objects.filter(
         user=request.user,
         status='FECHADA',
-        end_date__date=selected_date
+        end_date__date__range=[start_date, end_date]
     ).order_by('end_date')
 
-    # --- 1. CÁLCULO DOS KPIs ---
+    # --- CÁLCULO DOS KPIs (sem alterações na lógica) ---
     total_time_in_trades = timedelta()
     max_drawdown = 0
 
-    # --- CÁLCULO DOS KPIs ---
-    daily_results_brl = [convert_to_brl(op.net_financial_result, op.account.currency, op.end_date)
-                         for op in daily_ops if op.net_financial_result is not None]
+    period_results_brl = [convert_to_brl(op.net_financial_result, op.account.currency, op.end_date)
+                          for op in period_ops if op.net_financial_result is not None]
 
-    # P/L Diário (com conversão de moeda)
-    total_pl_day = sum(convert_to_brl(op.net_financial_result, op.account.currency, op.end_date)
-                       for op in daily_ops if op.net_financial_result is not None)
+    total_pl_period = sum(period_results_brl)
+    trade_count_period = period_ops.count()
+    winning_trades_period = len([r for r in period_results_brl if r > 0])
+    win_rate_period = (winning_trades_period /
+                       trade_count_period * 100) if trade_count_period > 0 else 0
+    avg_result_period = round(
+        sum(period_results_brl) / len(period_results_brl) if period_results_brl else 0, 2)
 
-    # Número de trades
-    trade_count_day = daily_ops.count()
-
-    # Taxa de Acerto
-    winning_trades_day = daily_ops.filter(net_financial_result__gt=0).count()
-    win_rate_day = (winning_trades_day / trade_count_day *
-                    100) if trade_count_day > 0 else 0
-
-    # Expectativa Matemática (Resultado Médio por trade)
-    # Precisamos converter cada resultado antes de calcular a média
-    daily_results_brl = [convert_to_brl(op.net_financial_result, op.account.currency, op.end_date)
-                         for op in daily_ops if op.net_financial_result is not None]
-    avg_result_day = sum(daily_results_brl) / \
-        len(daily_results_brl) if daily_results_brl else 0
-
-    avg_result_day = round(avg_result_day, 2)
-
-    # 2. Drawdown Máximo do Dia (em BRL)
-    if daily_ops.exists():
-        # 1. Tempo Total Operando
-        for op in daily_ops:
+    if period_ops.exists():
+        for op in period_ops:
             if op.end_date and op.start_date:
                 total_time_in_trades += op.end_date - op.start_date
 
-        # 2. Drawdown Máximo do Dia (em BRL)
         peak = 0
         cumulative_pl = 0
-        for result in daily_results_brl:
+        for result in period_results_brl:
             cumulative_pl += result
             if cumulative_pl > peak:
                 peak = cumulative_pl
-
             drawdown = peak - cumulative_pl
             if drawdown > max_drawdown:
                 max_drawdown = drawdown
 
     context = {
-        'selected_date': selected_date,
-        'date_str': date_str,  # Para preencher o seletor de data
-        'daily_ops': daily_ops,
-        'total_pl_day': total_pl_day,
-        'trade_count_day': trade_count_day,
-        'win_rate_day': win_rate_day,
-        'avg_result_day': avg_result_day,
+        'start_date': start_date,
+        'end_date': end_date,
+        'period_ops': period_ops,
+        'total_pl_period': total_pl_period,
+        'trade_count_period': trade_count_period,
+        'win_rate_period': win_rate_period,
+        'avg_result_period': avg_result_period,
         'total_time_in_trades': total_time_in_trades,
         'max_drawdown': max_drawdown,
     }
