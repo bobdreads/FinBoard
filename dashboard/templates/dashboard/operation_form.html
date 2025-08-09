@@ -66,16 +66,13 @@
                 </div>
 
                 <h2 class="text-lg font-semibold text-white border-b border-gray-700 pb-2">Plano e Execução</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div><label class="block mb-2 text-sm font-medium text-gray-300">{{ form.start_date.label }}</label>{{ form.start_date }}</div>
-                    <div><label class="block mb-2 text-sm font-medium text-gray-300">{{ form.end_date.label }} <span class="text-gray-500">(Opcional)</span></label>{{ form.end_date }}</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                     <div><label class="block mb-2 text-sm font-medium text-gray-300">{{ form.initial_stop_price.label }}</label>{{ form.initial_stop_price }}</div>
                     <div><label class="block mb-2 text-sm font-medium text-gray-300">{{ form.initial_target_price.label }}</label>{{ form.initial_target_price }}</div>
                 </div>
                 
                 <h2 class="text-lg font-semibold text-white border-b border-gray-700 pb-2">Resultados <span class="text-base font-normal text-gray-500">(Opcional)</span></h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div><label class="block mb-2 text-sm font-medium text-gray-300">{{ form.status.label }}</label>{{ form.status }}</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                     <div><label class="block mb-2 text-sm font-medium text-gray-300">{{ form.net_financial_result.label }}</label>{{ form.net_financial_result }}</div>
                     <div><label class="block mb-2 text-sm font-medium text-gray-300">{{ form.points_pips_result.label }}</label>{{ form.points_pips_result }}</div>
                 </div>

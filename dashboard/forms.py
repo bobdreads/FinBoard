@@ -43,7 +43,6 @@ class OperationForm(forms.ModelForm):
         model = Operation
         fields = [
             'account', 'asset', 'strategy', 'initial_operation_type',
-            'start_date', 'end_date', 'status',
             'initial_stop_price', 'initial_target_price',
             'net_financial_result', 'points_pips_result',
             'entry_reason', 'general_notes', 'entry_sentiment', 'execution_rating',
@@ -66,7 +65,6 @@ class OperationForm(forms.ModelForm):
         if user:
             self.fields['account'].queryset = Account.objects.filter(user=user)
 
-        self.fields['end_date'].required = False
         self.fields['net_financial_result'].required = False
         self.fields['points_pips_result'].required = False
         self.fields['general_notes'].required = False

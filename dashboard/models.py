@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 # Importe F para referenciar campos
-from django.db.models import Sum, Case, When, F
+from django.db.models import Sum, Case, When, F, Min, Max
 from decimal import Decimal  # Importe Decimal para cálculos precisos
 
 # --- NOVOS MODELOS ---
@@ -144,8 +144,46 @@ class Operation(models.Model):
         "Sentimento na Entrada", max_length=10, choices=SENTIMENT_CHOICES, blank=True, null=True)
     execution_rating = models.IntegerField("Qualidade da Execução (1-5)", validators=[
                                            MinValueValidator(1), MaxValueValidator(5)], null=True, blank=True)
+
     def __str__(
         self): return f"Operação #{self.id} - {self.asset.ticker} - {self.user.username}"
+
+    def update_calculated_fields(self):
+        """
+        Calcula e atualiza os campos da operação com base em seus movimentos.
+        """
+        movements = self.movements.all().order_by('datetime')
+
+        if not movements.exists():
+            # Se não há movimentos, reseta os campos
+            self.start_date = None
+            self.end_date = None
+            self.status = 'ABERTA'  # Ou outro status padrão que queira
+            self.save()
+            return
+
+        # Define a data de início com base no primeiro movimento
+        self.start_date = movements.first().datetime
+
+        # Calcula a quantidade total de entradas e saídas
+        quantities = movements.aggregate(
+            total_entry=Sum('quantity', filter=models.Q(type='ENTRADA')),
+            total_exit=Sum('quantity', filter=models.Q(type='SAIDA'))
+        )
+        total_entry = quantities['total_entry'] or 0
+        total_exit = quantities['total_exit'] or 0
+
+        # Atualiza o status e a data de fim
+        if total_entry == total_exit and total_entry > 0:
+            self.status = 'FECHADA'
+            # A data de fim é a data do último movimento de saída
+            last_exit = movements.filter(type='SAIDA').last()
+            self.end_date = last_exit.datetime if last_exit else None
+        else:
+            self.status = 'ABERTA'
+            self.end_date = None
+
+        self.save()
 
 
 class Movement(models.Model):
@@ -160,8 +198,22 @@ class Movement(models.Model):
     price = models.DecimalField("Preço", max_digits=12, decimal_places=5)
     costs = models.DecimalField(
         "Custos", max_digits=10, decimal_places=2, default=0.0)
+
     def __str__(
         self): return f"{self.type} de {self.quantity} em {self.operation.asset.ticker}"
+
+    def save(self, *args, **kwargs):
+        # Primeiro, salva o próprio movimento
+        super().save(*args, **kwargs)
+        # Em seguida, aciona a atualização na operação pai
+        self.operation.update_calculated_fields()
+
+    def delete(self, *args, **kwargs):
+        # Armazena a referência da operação pai antes de se deletar
+        operation = self.operation
+        super().delete(*args, **kwargs)
+        # Aciona a atualização na operação pai
+        operation.update_calculated_fields()
 
 
 class Attachment(models.Model):

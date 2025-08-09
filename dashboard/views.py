@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.forms import inlineformset_factory  # Importe o inlineformset_factory
-from django.db import transaction
+from django.db import transaction, IntegrityError
 
 from decimal import Decimal
 
@@ -121,29 +121,49 @@ def operation_create(request):
         formset = MovementFormSet(request.POST)
 
         if form.is_valid() and formset.is_valid():
-            try:
-                # Usamos uma transação atômica para garantir que ou tudo é salvo, ou nada é.
-                with transaction.atomic():
-                    operation = form.save(commit=False)
-                    operation.user = request.user
-                    operation.save()
-                    form.save_m2m()  # Salva as tags
+            # --- LÓGICA DE CORREÇÃO ---
+            # 1. Extrair a data de início antes de salvar
+            earliest_date = None
 
-                    # Agora, salvamos os movimentos associando-os à operação recém-criada
-                    formset.instance = operation
-                    formset.save()
+            # Filtra os formulários de movimento que foram realmente preenchidos
+            valid_movements_data = [
+                f.cleaned_data for f in formset if f.has_changed()]
 
-                    return redirect('core:home')
-            except IntegrityError:
-                # Lidar com possíveis erros aqui
-                print("Erro ao salvar form/formset.")
+            if not valid_movements_data:
+                form.add_error(
+                    None, "Você deve preencher pelo menos um movimento.")
+            else:
+                # Encontra a menor data entre os movimentos preenchidos
+                earliest_date = min(
+                    data['datetime'] for data in valid_movements_data if data.get('datetime'))
+
+            if earliest_date:
+                try:
+                    with transaction.atomic():
+                        operation = form.save(commit=False)
+                        operation.user = request.user
+
+                        # 2. Atribuir a data de início ANTES de salvar a operação
+                        operation.start_date = earliest_date
+
+                        operation.save()
+                        form.save_m2m()  # Salva as tags
+
+                        formset.instance = operation
+                        formset.save()
+
+                        return redirect('core:home')
+                except IntegrityError as e:
+                    print(f"Erro de Integridade: {e}")
+        else:
+            print("Erros de Validação:", form.errors, formset.errors)
     else:
         form = OperationForm(user=request.user)
         formset = MovementFormSet()
 
     context = {
         'form': form,
-        'formset': formset,  # Passamos o formset para o template
+        'formset': formset,
     }
     return render(request, 'dashboard/operation_form.html', context)
 
