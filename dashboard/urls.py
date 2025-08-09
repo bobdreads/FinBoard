@@ -24,4 +24,6 @@ urlpatterns = [
     path('strategies/<int:pk>/edit/', views.strategy_update, name='strategy_edit'),
     path('strategies/<int:pk>/delete/',
          views.strategy_delete, name='strategy_delete'),
+
+    path('summary/', views.daily_summary, name='daily_summary'),
 ]

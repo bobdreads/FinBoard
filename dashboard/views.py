@@ -1,12 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.forms import inlineformset_factory  # Importe o inlineformset_factory
-from django.db import transaction, IntegrityError
-
 from decimal import Decimal
+from django.forms import inlineformset_factory
+from django.db import transaction, IntegrityError
+from django.db.models import Sum, Count, Avg, Max, Min, F, ExpressionWrapper, fields
+from django.utils import timezone
+from datetime import datetime
 
 from .models import Account, Transaction, Operation, Strategy, Movement
 from .forms import AccountForm, TransactionForm, OperationForm, StrategyForm, MovementForm
+from .currency_converter import convert_to_brl
 
 
 @login_required
@@ -298,3 +301,54 @@ def strategy_delete(request, pk):
         strategy.delete()
         return redirect('dashboard:strategy_list')
     return render(request, 'dashboard/strategy_confirm_delete.html', {'object': strategy})
+
+
+@login_required
+def daily_summary(request):
+    """
+    Exibe um resumo de performance para um dia específico.
+    """
+    # Pega a data do request (via GET), ou usa a data de hoje como padrão
+    date_str = request.GET.get('date', timezone.now().strftime('%Y-%m-%d'))
+    selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+
+    # Filtra operações fechadas NAQUELE DIA para o usuário logado
+    daily_ops = Operation.objects.filter(
+        user=request.user,
+        status='FECHADA',
+        end_date__date=selected_date
+    )
+
+    # --- 1. CÁLCULO DOS KPIs ---
+
+    # P/L Diário (com conversão de moeda)
+    total_pl_day = sum(convert_to_brl(op.net_financial_result, op.account.currency, op.end_date)
+                       for op in daily_ops if op.net_financial_result is not None)
+
+    # Número de trades
+    trade_count_day = daily_ops.count()
+
+    # Taxa de Acerto
+    winning_trades_day = daily_ops.filter(net_financial_result__gt=0).count()
+    win_rate_day = (winning_trades_day / trade_count_day *
+                    100) if trade_count_day > 0 else 0
+
+    # Expectativa Matemática (Resultado Médio por trade)
+    # Precisamos converter cada resultado antes de calcular a média
+    daily_results_brl = [convert_to_brl(op.net_financial_result, op.account.currency, op.end_date)
+                         for op in daily_ops if op.net_financial_result is not None]
+    avg_result_day = sum(daily_results_brl) / \
+        len(daily_results_brl) if daily_results_brl else 0
+
+    context = {
+        'selected_date': selected_date,
+        'date_str': date_str,  # Para preencher o seletor de data
+        'daily_ops': daily_ops,
+        'total_pl_day': total_pl_day,
+        'trade_count_day': trade_count_day,
+        'win_rate_day': win_rate_day,
+        'avg_result_day': avg_result_day,
+        # Adicionaremos os outros KPIs aqui nos próximos passos
+    }
+
+    return render(request, 'dashboard/daily_summary.html', context)
