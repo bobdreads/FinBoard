@@ -7,14 +7,8 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').upper() == 'TRUE'
 
 ALLOWED_HOSTS = []
@@ -23,6 +17,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+
+    # Adicionado para o WhiteNoise servir estáticos em desenvolvimento sem conflito
+    'whitenoise.runserver_nostatic',
 
     # Apps padrão do Django
     'django.contrib.admin',
@@ -121,24 +118,39 @@ STATIC_URL = 'static/'
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django_plotly_dash.finders.DashComponentFinder',  # Adicionado!
+]
+
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Dash
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
-# Para onde o usuário é redirecionado após o login com sucesso.
-# 'core:home' é o nome da nossa URL da página inicial.
+PLOTLY_DASH = {
+    "serve_locally": True,
+}
+
+# Lista explícita de componentes para o DashComponentFinder inspecionar.
+PLOTLY_COMPONENTS = [
+    'dash',
+    'dash_bootstrap_components',
+    'dpd_components',
+    'dpd_static_support',
+]
+
+# --- CONFIGURAÇÃO DE AUTENTICAÇÃO E REDIRECIONAMENTO ---
 LOGIN_REDIRECT_URL = 'core:home'
-
-# Para onde o usuário é redirecionado quando uma página exige login
-# e ele não está logado.
 LOGIN_URL = 'core:login'
-
-# Para onde o usuário é redirecionado após o logout.
-# (Opcional, se não definido, vai para a página de admin de logout)
 LOGOUT_REDIRECT_URL = 'core:login'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
