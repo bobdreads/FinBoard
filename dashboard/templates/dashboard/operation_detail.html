@@ -1,0 +1,118 @@
+{% extends 'core/base.html' %}
+{% load currency_filters %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <a href="{% url 'dashboard:operation_list' %}" class="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">&larr; Voltar para o histórico</a>
+        <div class="mt-2 md:flex md:items-center md:justify-between">
+            <div class="min-w-0 flex-1">
+                <h1 class="text-3xl font-bold text-white">Operação #{{ operation.id }}: {{ operation.asset.ticker }}</h1>
+                <p class="mt-1 text-lg text-gray-400">
+                    {{ operation.get_initial_operation_type_display }} em {{ operation.start_date|date:"d/m/Y" }}
+                </p>
+            </div>
+            <div class="mt-4 flex flex-shrink-0 md:ml-4 md:mt-0">
+                <a href="{% url 'dashboard:operation_edit' pk=operation.pk %}" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Editar</a>
+                <a href="{% url 'dashboard:operation_delete' pk=operation.pk %}" class="px-4 py-2 text-sm font-medium text-white bg-red-700 rounded-lg hover:bg-red-800">Excluir</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 space-y-8">
+            <div class="bg-gray-800 rounded-xl shadow-lg">
+                <h3 class="px-6 py-4 text-lg font-semibold text-white border-b border-gray-700">Movimentos</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm text-left text-gray-300">
+                        <thead class="text-xs text-gray-400 uppercase bg-gray-700/50">
+                            <tr>
+                                <th class="px-6 py-3">Data/Hora</th>
+                                <th class="px-6 py-3">Tipo</th>
+                                <th class="px-6 py-3 text-right">Quantidade</th>
+                                <th class="px-6 py-3 text-right">Preço</th>
+                                <th class="px-6 py-3 text-right">Custos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mov in movements %}
+                            <tr class="border-b border-gray-700 last:border-b-0">
+                                <td class="px-6 py-4">{{ mov.datetime|date:"d/m/y H:i:s" }}</td>
+                                <td class="px-6 py-4">{{ mov.get_type_display }}</td>
+                                <td class="px-6 py-4 text-right font-mono">{{ mov.quantity|floatformat:0 }}</td>
+                                <td class="px-6 py-4 text-right font-mono">{{ mov.price|floatformat:5 }}</td>
+                                <td class="px-6 py-4 text-right font-mono">{{ mov.costs|format_currency:operation.account.currency }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">Análise Pós-Trade</h3>
+                <dl class="space-y-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-400">Motivo da Entrada</dt>
+                        <dd class="mt-1 text-gray-200">{{ operation.entry_reason|linebreaksbr }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-400">Observações Gerais (Lições Aprendidas)</dt>
+                        <dd class="mt-1 text-gray-200">{{ operation.general_notes|default:"Nenhuma."|linebreaksbr }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <div class="space-y-8">
+            <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">Resultados</h3>
+                <dl class="space-y-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-400">Status</dt>
+                        <dd class="mt-1">
+                            {% if operation.status == 'FECHADA' %}
+                                <span class="px-2 py-1 text-sm font-medium text-white bg-gray-600 rounded-full">{{ operation.get_status_display }}</span>
+                            {% else %}
+                                <span class="px-2 py-1 text-sm font-medium text-blue-200 bg-blue-900 rounded-full">{{ operation.get_status_display }}</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-400">Resultado Financeiro</dt>
+                        <dd class="mt-1 text-2xl font-mono {% if operation.net_financial_result > 0 %}text-green-400{% elif operation.net_financial_result < 0 %}text-red-400{% else %}text-gray-200{% endif %}">
+                            {{ operation.net_financial_result|format_currency:operation.account.currency|default:"--" }}
+                        </dd>
+                    </div>
+                     <div>
+                        <dt class="text-sm font-medium text-gray-400">Resultado em Pontos/Pips</dt>
+                        <dd class="mt-1 text-xl font-mono text-gray-200">{{ operation.points_pips_result|floatformat:2|default:"--" }}</dd>
+                    </div>
+                </dl>
+            </div>
+            
+            <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">Detalhes da Operação</h3>
+                 <dl class="space-y-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-400">Carteira</dt>
+                        <dd class="mt-1 text-gray-200">{{ operation.account.name }}</dd>
+                    </div>
+                     <div>
+                        <dt class="text-sm font-medium text-gray-400">Estratégia</dt>
+                        <dd class="mt-1 text-gray-200">{{ operation.strategy.name|default:"N/A" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-400">Sentimento na Entrada</dt>
+                        <dd class="mt-1 text-gray-200">{{ operation.get_entry_sentiment_display|default:"N/A" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-400">Qualidade da Execução</dt>
+                        <dd class="mt-1 text-gray-200">{{ operation.execution_rating }}/5</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -169,6 +169,97 @@ def operation_create(request):
 
 
 @login_required
+def operation_list(request):
+    """
+    Exibe a lista completa de operações do usuário logado.
+    """
+    operations = Operation.objects.filter(
+        user=request.user).order_by('-start_date')
+    context = {
+        'operations': operations
+    }
+    return render(request, 'dashboard/operation_list.html', context)
+
+
+@login_required
+def operation_detail(request, pk):
+    """
+    Exibe todos os detalhes de uma única operação.
+    """
+    operation = get_object_or_404(Operation, pk=pk, user=request.user)
+    movements = operation.movements.all().order_by('datetime')
+
+    context = {
+        'operation': operation,
+        'movements': movements,
+    }
+    return render(request, 'dashboard/operation_detail.html', context)
+
+
+@login_required
+def operation_update(request, pk):
+    """
+    Atualiza uma operação existente e seus movimentos.
+    """
+    operation = get_object_or_404(Operation, pk=pk, user=request.user)
+
+    MovementFormSet = inlineformset_factory(
+        Operation,
+        Movement,
+        form=MovementForm,
+        extra=0,  # CORREÇÃO: Não adicionar formulários extras ao editar
+        can_delete=True  # Permite que o usuário marque movimentos para exclusão
+    )
+
+    if request.method == 'POST':
+        form = OperationForm(
+            request.POST, instance=operation, user=request.user)
+        formset = MovementFormSet(request.POST, instance=operation)
+
+        if form.is_valid() and formset.is_valid():
+            try:
+                with transaction.atomic():
+                    form.save()
+                    formset.save()
+                    # A lógica de recálculo no model Movement cuidará de atualizar o status
+                    operation.update_calculated_fields()
+                    return redirect('dashboard:operation_detail', pk=operation.pk)
+            except IntegrityError as e:
+                print(f"Erro de Integridade na atualização: {e}")
+        else:
+            print("Erros de Validação:", form.errors, formset.errors)
+
+    else:
+        form = OperationForm(instance=operation, user=request.user)
+        formset = MovementFormSet(instance=operation)
+
+    context = {
+        'form': form,
+        'formset': formset,
+        'operation': operation,
+    }
+    # Usaremos o mesmo template do formulário de criação, mas o contexto o adaptará
+    return render(request, 'dashboard/operation_form.html', context)
+
+
+@login_required
+def operation_delete(request, pk):
+    """
+    Exclui uma operação após a confirmação do usuário.
+    """
+    operation = get_object_or_404(Operation, pk=pk, user=request.user)
+    if request.method == 'POST':
+        operation.delete()
+        # Após deletar, envia o usuário para a lista de operações
+        return redirect('dashboard:operation_list')
+
+    context = {
+        'operation': operation
+    }
+    return render(request, 'dashboard/operation_confirm_delete.html', context)
+
+
+@login_required
 def strategy_list(request):
     # No futuro, podemos filtrar por usuário se necessário
     strategies = Strategy.objects.all()
