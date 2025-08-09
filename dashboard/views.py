@@ -1,8 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.forms import inlineformset_factory  # Importe o inlineformset_factory
+from django.db import transaction
+
 from decimal import Decimal
-from .models import Account, Transaction
-from .forms import AccountForm, TransactionForm
+
+from .models import Account, Transaction, Operation, Strategy, Movement
+from .forms import AccountForm, TransactionForm, OperationForm, StrategyForm, MovementForm
 
 
 @login_required
@@ -96,3 +100,90 @@ def transaction_create(request, account_pk):
         'account': account
     }
     return render(request, 'dashboard/transaction_form.html', context)
+
+
+@login_required
+def operation_create(request):
+    """
+    Cria uma nova operação (trade).
+    """
+    MovementFormSet = inlineformset_factory(
+        Operation,
+        Movement,
+        form=MovementForm,
+        # Começamos com 2 formulários de movimento (1 entrada, 1 saída)
+        extra=2,
+        can_delete=False
+    )
+
+    if request.method == 'POST':
+        form = OperationForm(request.POST, user=request.user)
+        formset = MovementFormSet(request.POST)
+
+        if form.is_valid() and formset.is_valid():
+            try:
+                # Usamos uma transação atômica para garantir que ou tudo é salvo, ou nada é.
+                with transaction.atomic():
+                    operation = form.save(commit=False)
+                    operation.user = request.user
+                    operation.save()
+                    form.save_m2m()  # Salva as tags
+
+                    # Agora, salvamos os movimentos associando-os à operação recém-criada
+                    formset.instance = operation
+                    formset.save()
+
+                    return redirect('core:home')
+            except IntegrityError:
+                # Lidar com possíveis erros aqui
+                print("Erro ao salvar form/formset.")
+    else:
+        form = OperationForm(user=request.user)
+        formset = MovementFormSet()
+
+    context = {
+        'form': form,
+        'formset': formset,  # Passamos o formset para o template
+    }
+    return render(request, 'dashboard/operation_form.html', context)
+
+
+@login_required
+def strategy_list(request):
+    # No futuro, podemos filtrar por usuário se necessário
+    strategies = Strategy.objects.all()
+    return render(request, 'dashboard/strategy_list.html', {'strategies': strategies})
+
+
+@login_required
+def strategy_create(request):
+    if request.method == 'POST':
+        form = StrategyForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard:strategy_list')
+    else:
+        form = StrategyForm()
+    return render(request, 'dashboard/strategy_form.html', {'form': form, 'action': 'Adicionar'})
+
+
+@login_required
+def strategy_update(request, pk):
+    strategy = get_object_or_404(Strategy, pk=pk)
+    if request.method == 'POST':
+        form = StrategyForm(request.POST, instance=strategy)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard:strategy_list')
+    else:
+        form = StrategyForm(instance=strategy)
+    return render(request, 'dashboard/strategy_form.html', {'form': form, 'action': 'Editar'})
+
+
+@login_required
+def strategy_delete(request, pk):
+    strategy = get_object_or_404(Strategy, pk=pk)
+    if request.method == 'POST':
+        strategy.delete()
+        return redirect('dashboard:strategy_list')
+    return render(request, 'dashboard/strategy_confirm_delete.html', {'object': strategy})

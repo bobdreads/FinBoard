@@ -10,4 +10,10 @@ urlpatterns = [
     path('accounts/<int:pk>/', views.account_detail, name='account_detail'),
     path('accounts/<int:account_pk>/add_transaction/',
          views.transaction_create, name='transaction_add'),
+    path('operations/add/', views.operation_create, name='operation_add'),
+    path('strategies/', views.strategy_list, name='strategy_list'),
+    path('strategies/add/', views.strategy_create, name='strategy_add'),
+    path('strategies/<int:pk>/edit/', views.strategy_update, name='strategy_edit'),
+    path('strategies/<int:pk>/delete/',
+         views.strategy_delete, name='strategy_delete'),
 ]

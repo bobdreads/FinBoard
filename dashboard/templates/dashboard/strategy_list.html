@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-white">Minhas Estratégias (Setups)</h1>
+        <a href="{% url 'dashboard:strategy_add' %}" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">+ Novo Setup</a>
+    </div>
+
+    <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
+        <table class="min-w-full text-sm text-left text-gray-300">
+            <thead class="text-xs text-gray-400 uppercase bg-gray-700/50">
+                <tr>
+                    <th scope="col" class="px-6 py-3">Nome do Setup</th>
+                    <th scope="col" class="px-6 py-3">Descrição</th>
+                    <th scope="col" class="px-6 py-3"><span class="sr-only">Ações</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for strategy in strategies %}
+                <tr class="border-b border-gray-700 hover:bg-gray-700/40">
+                    <td class="px-6 py-4 font-medium text-white">{{ strategy.name }}</td>
+                    <td class="px-6 py-4">{{ strategy.description|truncatewords:20 }}</td>
+                    <td class="px-6 py-4 text-right space-x-2">
+                        <a href="{% url 'dashboard:strategy_edit' pk=strategy.pk %}" class="font-medium text-indigo-400 hover:underline">Editar</a>
+                        <a href="{% url 'dashboard:strategy_delete' pk=strategy.pk %}" class="font-medium text-red-400 hover:underline">Excluir</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center py-10 text-gray-500">Nenhuma estratégia cadastrada.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
