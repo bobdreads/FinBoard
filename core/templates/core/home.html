@@ -26,7 +26,9 @@
         </div>
     </div>
     <div class="bg-gray-800 rounded-xl shadow-2xl p-4 mb-8">
-        {% plotly_app name="EquityCurve" initial_arguments=dash_context.EquityCurve %}
+        <div class="w-full">
+            {% plotly_app name="EquityCurve" initial_arguments=dash_context.EquityCurve %}
+        </div>
     </div>
 
     <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">

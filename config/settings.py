@@ -18,15 +18,13 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
 
-    # Adicionado para o WhiteNoise servir estáticos em desenvolvimento sem conflito
-    'whitenoise.runserver_nostatic',
-
     # Apps padrão do Django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
 
@@ -124,7 +122,7 @@ STATICFILES_FINDERS = [
     'django_plotly_dash.finders.DashComponentFinder',  # Adicionado!
 ]
 
-STORAGES = {
+STATICFILES_STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
