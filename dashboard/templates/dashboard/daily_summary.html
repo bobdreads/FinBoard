@@ -68,8 +68,8 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 lg: gap-8 mb-8">
-        <div class="grid grid-cols-1 lg:grid-cols-1 gap-8 mt-8">
+    <div class="grid grid-cols-1 sm:grid-cols-3 sm:grid-rows-3 lg:grid-cols-3 lg:grid-rows-3 lg: gap-8 mb-8">
+        <div class="col-span-2 row-span-2 col-start-1">
             <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden ">
                 <h3 class="px-6 py-4 text-lg font-semibold text-white border-b border-gray-700">Trades no Período ({{ period_ops.count }})</h3>
                 <div class="overflow-x-auto">
@@ -104,7 +104,7 @@
                 </div>
             </div>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-1 gap-8 mt-8">
+        <div class="col-start-3">
             <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
                 <h3 class="px-6 py-4 text-lg font-semibold text-white border-b border-gray-700">
                     Desempenho por Estratégia
@@ -138,6 +138,7 @@
                     </table>
                 </div>
             </div>
+        <div class="col-start-3 row-start-2">
             <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
                 <h3 class="px-6 py-4 text-lg font-semibold text-white border-b border-gray-700">
                     Desempenho por Ativo
@@ -171,6 +172,8 @@
                     </table>
                 </div>
             </div>
+        </div>
+        <div class="col-start-3 row-start-2">
             <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
                 <h3 class="px-6 py-4 text-lg font-semibold text-white border-b border-gray-700">
                     Desempenho por Direção
@@ -204,6 +207,8 @@
                     </table>
                 </div>
             </div>
+        </div>
+        <div class="col-start-3 row-start-3">
             <div class="bg-gray-800 rounded-xl shadow-2xl p-6 mb-8">
                 <h3 class="text-lg font-semibold text-white text-center mb-4">
                     Desempenho por Hora de Abertura (BRL)
