@@ -54,6 +54,18 @@
             <h3 class="text-sm font-medium text-gray-400">Tempo em Operação</h3>
             <p class="text-3xl font-bold mt-2 text-white">{{ total_time_in_trades }}</p>
         </div>
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+            <h3 class="text-sm font-medium text-gray-400">Maior Ganho (BRL)</h3>
+            <p class="text-3xl font-bold mt-2 font-mono text-green-400">
+                {{ max_gain|format_currency:"BRL" }}
+            </p>
+        </div>
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+            <h3 class="text-sm font-medium text-gray-400">Maior Prejuízo (BRL)</h3>
+            <p class="text-3xl font-bold mt-2 font-mono text-red-400">
+                {{ max_loss|format_currency:"BRL" }}
+            </p>
+        </div>
     </div>
 
     <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
@@ -87,6 +99,41 @@
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-1 gap-8 mt-8">
+        <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
+            <h3 class="px-6 py-4 text-lg font-semibold text-white border-b border-gray-700">
+                Desempenho por Estratégia
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-left text-gray-300">
+                    <thead class="text-xs text-gray-400 uppercase bg-gray-700/50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Estratégia</th>
+                            <th scope="col" class="px-6 py-3 text-center">Nº Trades</th>
+                            <th scope="col" class="px-6 py-3 text-right">P/L (BRL)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for name, data in strategy_performance.items %}
+                        <tr class="border-b border-gray-700 last:border-b-0">
+                            <td class="px-6 py-4 font-medium text-white">{{ name }}</td>
+                            <td class="px-6 py-4 text-center text-gray-400">{{ data.trade_count }}</td>
+                            <td class="px-6 py-4 text-right font-mono {% if data.total_pl > 0 %}text-green-400{% elif data.total_pl < 0 %}text-red-400{% else %}text-gray-200{% endif %}">
+                                {{ data.total_pl|format_currency:"BRL" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center py-10 text-gray-500">
+                                Nenhum dado de estratégia para exibir.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

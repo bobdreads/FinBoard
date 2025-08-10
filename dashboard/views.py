@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from decimal import Decimal
 from django.forms import inlineformset_factory
 from django.db import transaction, IntegrityError
 from django.db.models import Sum, Count, Avg, Max, Min, F, ExpressionWrapper, fields
 from django.utils import timezone
+
+from decimal import Decimal
 from datetime import datetime, timedelta
+from collections import defaultdict
 
 from .models import Account, Transaction, Operation, Strategy, Movement
 from .forms import AccountForm, TransactionForm, OperationForm, StrategyForm, MovementForm
@@ -364,7 +366,7 @@ def daily_summary(request):
     """
     Exibe um resumo de performance para um período de tempo selecionado. (VERSÃO SIMPLIFICADA)
     """
-    today = timezone.now().date()
+    today = timezone.localtime(timezone.now()).date()
 
     # --- LÓGICA DE DATAS SIMPLIFICADA ---
     # Pega as datas do request, ou usa a data de hoje como padrão para ambas
@@ -395,6 +397,12 @@ def daily_summary(request):
                        trade_count_period * 100) if trade_count_period > 0 else 0
     avg_result_period = round(
         sum(period_results_brl) / len(period_results_brl) if period_results_brl else 0, 2)
+    max_gain = 0
+    max_loss = 0
+    if period_results_brl:
+        max_gain = max(period_results_brl)
+        # Encontramos o menor valor (o maior prejuízo) e o tornamos positivo para exibição
+        max_loss = min(period_results_brl)
 
     if period_ops.exists():
         for op in period_ops:
@@ -411,6 +419,23 @@ def daily_summary(request):
             if drawdown > max_drawdown:
                 max_drawdown = drawdown
 
+    strategy_performance = defaultdict(
+        lambda: {'total_pl': 0, 'trade_count': 0})
+
+    for op in period_ops:
+        # Usa o nome da estratégia ou "N/A" se nenhuma for definida
+        strategy_name = op.strategy.name if op.strategy else "N/A"
+
+        result_brl = convert_to_brl(
+            op.net_financial_result, op.account.currency, op.end_date)
+
+        if result_brl is not None:
+            strategy_performance[strategy_name]['total_pl'] += result_brl
+            strategy_performance[strategy_name]['trade_count'] += 1
+
+    # Converte o defaultdict para um dict normal para o template
+    strategy_performance = dict(strategy_performance)
+
     context = {
         'start_date': start_date,
         'end_date': end_date,
@@ -421,6 +446,9 @@ def daily_summary(request):
         'avg_result_period': avg_result_period,
         'total_time_in_trades': total_time_in_trades,
         'max_drawdown': max_drawdown,
+        'strategy_performance': strategy_performance,
+        'max_gain': max_gain,
+        'max_loss': max_loss,
     }
 
     return render(request, 'dashboard/daily_summary.html', context)
