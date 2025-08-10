@@ -19,6 +19,42 @@
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+            <h3 class="text-sm font-medium text-gray-400">Saldo (Patrimônio Total)</h3>
+            <p class="text-3xl font-bold mt-2 text-indigo-400">
+                {{ total_current_balance|format_currency:"BRL" }}
+            </p>
+            <p class="text-sm mt-1 font-mono {% if patrimony_change_percentage > 0 %}text-green-400{% elif patrimony_change_percentage < 0 %}text-red-400{% else %}text-gray-400{% endif %}">
+                {{ patrimony_change_percentage|floatformat:2 }}% desde o início
+            </p>
+        </div>
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+            <h3 class="text-sm font-medium text-gray-400">Ganhos Último Dia</h3>
+            <p class="text-3xl font-bold mt-2 {% if gains_last_day > 0 %}text-green-400{% elif gains_last_day < 0 %}text-red-400{% else %}text-gray-200{% endif %}">
+                {{ gains_last_day|format_currency:"BRL" }}
+            </p>
+            <p class="text-sm mt-1 font-mono {% if last_day_percentage > 0 %}text-green-400{% elif last_day_percentage < 0 %}text-red-400{% else %}text-gray-400{% endif %}">
+                {{ last_day_percentage|floatformat:2 }}% do saldo
+            </p>
+        </div>
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+            <h3 class="text-sm font-medium text-gray-400">Ganhos no Mês</h3>
+            <p class="text-3xl font-bold mt-2 {% if gains_this_month > 0 %}text-green-400{% elif gains_this_month < 0 %}text-red-400{% else %}text-gray-200{% endif %}">
+                {{ gains_this_month|format_currency:"BRL" }}
+            </p>
+             <p class="text-sm mt-1 font-mono {% if month_percentage > 0 %}text-green-400{% elif month_percentage < 0 %}text-red-400{% else %}text-gray-400{% endif %}">
+                {{ month_percentage|floatformat:2 }}% do saldo
+            </p>
+        </div>
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+            <h3 class="text-sm font-medium text-gray-400">Ganhos no Ano</h3>
+            <p class="text-3xl font-bold mt-2 {% if gains_this_year > 0 %}text-green-400{% elif gains_this_year < 0 %}text-red-400{% else %}text-gray-200{% endif %}">
+                {{ gains_this_year|format_currency:"BRL" }}
+            </p>
+             <p class="text-sm mt-1 font-mono {% if year_percentage > 0 %}text-green-400{% elif year_percentage < 0 %}text-red-400{% else %}text-gray-400{% endif %}">
+                {{ year_percentage|floatformat:2 }}% do saldo
+            </p>
+        </div>
         <div class="bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col justify-between">
             <h3 class="text-sm font-medium text-gray-400">Resultado Total</h3>
             <p class="text-3xl font-bold mt-2 font-mono {% if total_pl > 0 %} text-green-400 {% else %} text-red-400 {% endif %}">
@@ -32,6 +68,11 @@
         <div class="bg-gray-800 rounded-xl shadow-lg p-6">
             <h3 class="text-sm font-medium text-gray-400">Taxa de Acerto</h3>
             <p class="text-3xl font-bold mt-2 text-indigo-400">{{ win_rate|floatformat:1 }}%</p>
+            <p class="text-sm mt-1 text-gray-400">
+                <span class="font-bold text-green-400">{{ winning_trades }}W</span>
+                <span>-</span>
+                <span class="font-bold text-red-400">{{ losing_trades }}L</span>
+            </p>
         </div>
     </div>
     <div class="bg-gray-800 rounded-xl shadow-2xl p-4 mb-8">

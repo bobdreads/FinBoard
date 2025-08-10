@@ -436,6 +436,16 @@ def daily_summary(request):
     # Converte o defaultdict para um dict normal para o template
     strategy_performance = dict(strategy_performance)
 
+    asset_performance = defaultdict(lambda: {'total_pl': 0, 'trade_count': 0})
+    for op in period_ops:
+        asset_ticker = op.asset.ticker
+        result_brl = convert_to_brl(
+            op.net_financial_result, op.account.currency, op.end_date)
+        if result_brl is not None:
+            asset_performance[asset_ticker]['total_pl'] += result_brl
+            asset_performance[asset_ticker]['trade_count'] += 1
+    asset_performance = dict(asset_performance)
+
     context = {
         'start_date': start_date,
         'end_date': end_date,
@@ -449,6 +459,7 @@ def daily_summary(request):
         'strategy_performance': strategy_performance,
         'max_gain': max_gain,
         'max_loss': max_loss,
+        'asset_performance': asset_performance,
     }
 
     return render(request, 'dashboard/daily_summary.html', context)
