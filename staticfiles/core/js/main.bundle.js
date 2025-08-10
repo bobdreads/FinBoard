@@ -85548,41 +85548,78 @@
   var require_main = __commonJS({
     "src/main.js"() {
       init_echarts2();
-      window.renderEquityChart = function(chartData) {
-        var chartDom = document.getElementById("equity-chart");
-        if (!chartDom) return;
-        var myChart = init2(chartDom);
-        var option = {
-          title: {
-            text: "Curva de Patrim\xF4nio Acumulado (em BRL)",
-            left: "center",
-            textStyle: { color: "#FFFFFF" }
-          },
-          tooltip: { trigger: "axis" },
-          xAxis: {
-            type: "category",
-            data: chartData.dates,
-            axisLine: { lineStyle: { color: "#888" } }
-          },
-          yAxis: {
-            type: "value",
-            axisLine: { lineStyle: { color: "#888" } },
-            splitLine: { lineStyle: { color: "#444" } }
-          },
+      window.renderEquityChart = function() {
+        const chartDom = document.getElementById("equity-chart");
+        const chartDataEl = document.getElementById("chart-data-json");
+        if (!chartDom || !chartDataEl) {
+          return;
+        }
+        const chartData = JSON.parse(chartDataEl.textContent);
+        const myChart = init2(chartDom);
+        let titleText = "Curva de Resultado Total Acumulado (em BRL)";
+        if (chartData.dates.length === 0) {
+          titleText = "Curva de Resultado Total Acumulado (Sem opera\xE7\xF5es fechadas para exibir)";
+        }
+        const option = {
+          title: { text: titleText, left: "center", textStyle: { color: "#e5e7eb" } },
+          tooltip: { trigger: "axis", backgroundColor: "rgba(31, 41, 55, 0.8)", borderColor: "#4b5563", textStyle: { color: "#d1d5db" } },
+          xAxis: { type: "category", data: chartData.dates, axisLine: { lineStyle: { color: "#6b7280" } } },
+          yAxis: { type: "value", axisLine: { lineStyle: { color: "#6b7280" } }, splitLine: { lineStyle: { color: "#374151" } } },
           series: [{
+            name: "Patrim\xF4nio",
             data: chartData.values,
             type: "line",
             smooth: true,
-            itemStyle: { color: "#6366F1" },
-            lineStyle: { color: "#6366F1", width: 2 }
+            showSymbol: chartData.values.length < 50,
+            itemStyle: { color: "#818cf8" },
+            lineStyle: { color: "#6366f1", width: 2 }
           }],
           grid: { left: "3%", right: "4%", bottom: "3%", containLabel: true },
           backgroundColor: "rgba(0,0,0,0)"
         };
         myChart.setOption(option);
-        window.addEventListener("resize", function() {
-          myChart.resize();
-        });
+        window.addEventListener("resize", () => myChart.resize());
+      };
+      window.renderHourlyPerformanceChart = function() {
+        const chartDom = document.getElementById("hourly-performance-chart");
+        const chartDataEl = document.getElementById("hourly-chart-data-json");
+        if (!chartDom || !chartDataEl) {
+          return;
+        }
+        const chartData = JSON.parse(chartDataEl.textContent);
+        const myChart = init2(chartDom);
+        const option = {
+          tooltip: {
+            trigger: "axis",
+            axisPointer: { type: "shadow" }
+          },
+          grid: { left: "3%", right: "4%", bottom: "3%", containLabel: true },
+          backgroundColor: "rgba(0,0,0,0)",
+          xAxis: {
+            type: "category",
+            data: chartData.hours,
+            axisLine: { lineStyle: { color: "#888" } }
+          },
+          yAxis: {
+            type: "value",
+            axisLabel: { formatter: "R$ {value}" },
+            axisLine: { lineStyle: { color: "#888" } },
+            splitLine: { lineStyle: { color: "#374151" } }
+          },
+          series: [{
+            name: "P/L por Hora",
+            type: "bar",
+            data: chartData.values.map((val) => ({
+              value: val,
+              itemStyle: {
+                color: val >= 0 ? "#4ade80" : "#f87171"
+                // Verde para lucro, vermelho para prejuízo
+              }
+            }))
+          }]
+        };
+        myChart.setOption(option);
+        window.addEventListener("resize", () => myChart.resize());
       };
       console.log("JavaScript do FinBoard carregado com sucesso! \u{1F680}");
     }
