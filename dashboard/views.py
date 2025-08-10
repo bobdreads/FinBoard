@@ -446,6 +446,40 @@ def daily_summary(request):
             asset_performance[asset_ticker]['trade_count'] += 1
     asset_performance = dict(asset_performance)
 
+    direction_performance = defaultdict(
+        lambda: {'total_pl': 0, 'trade_count': 0})
+    for op in period_ops:
+        # O modelo armazena 'COMPRA' ou 'VENDA'
+        # Pega o nome amigável ("Compra" ou "Venda")
+        direction_name = op.get_initial_operation_type_display()
+        result_brl = convert_to_brl(
+            op.net_financial_result, op.account.currency, op.end_date)
+        if result_brl is not None:
+            direction_performance[direction_name]['total_pl'] += result_brl
+            direction_performance[direction_name]['trade_count'] += 1
+    direction_performance = dict(direction_performance)
+
+    hourly_performance = defaultdict(lambda: {'total_pl': 0, 'trade_count': 0})
+    for op in period_ops:
+        # Extrai a hora da data de início da operação
+        hour = op.start_date.hour
+        result_brl = convert_to_brl(
+            op.net_financial_result, op.account.currency, op.end_date)
+        if result_brl is not None:
+            hourly_performance[hour]['total_pl'] += result_brl
+            hourly_performance[hour]['trade_count'] += 1
+
+    # Prepara os dados para o gráfico ECharts
+    hours = list(range(24))  # Eixo X: 0h a 23h
+    hourly_pl_values = [round(float(hourly_performance.get(
+        h, {}).get('total_pl', 0)), 2) for h in hours]
+
+    hourly_chart_data = {
+        # Formata para "09h", "10h", etc.
+        'hours': [f"{h:02d}h" for h in hours],
+        'values': hourly_pl_values
+    }
+
     context = {
         'start_date': start_date,
         'end_date': end_date,
@@ -460,6 +494,8 @@ def daily_summary(request):
         'max_gain': max_gain,
         'max_loss': max_loss,
         'asset_performance': asset_performance,
+        'direction_performance': direction_performance,
+        'hourly_chart_data_json': json.dumps(hourly_chart_data),
     }
 
     return render(request, 'dashboard/daily_summary.html', context)

@@ -41,4 +41,49 @@ window.renderEquityChart = function() {
     window.addEventListener('resize', () => myChart.resize());
 }
 
+window.renderHourlyPerformanceChart = function() {
+    const chartDom = document.getElementById('hourly-performance-chart');
+    const chartDataEl = document.getElementById('hourly-chart-data-json');
+
+    if (!chartDom || !chartDataEl) {
+        return;
+    }
+
+    const chartData = JSON.parse(chartDataEl.textContent);
+    const myChart = echarts.init(chartDom);
+
+    const option = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' }
+        },
+        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+        backgroundColor: 'rgba(0,0,0,0)',
+        xAxis: {
+            type: 'category',
+            data: chartData.hours,
+            axisLine: { lineStyle: { color: '#888' } }
+        },
+        yAxis: {
+            type: 'value',
+            axisLabel: { formatter: 'R$ {value}' },
+            axisLine: { lineStyle: { color: '#888' } },
+            splitLine: { lineStyle: { color: '#374151' } }
+        },
+        series: [{
+            name: 'P/L por Hora',
+            type: 'bar',
+            data: chartData.values.map(val => ({
+                value: val,
+                itemStyle: {
+                    color: val >= 0 ? '#4ade80' : '#f87171' // Verde para lucro, vermelho para prejuízo
+                }
+            }))
+        }]
+    };
+
+    myChart.setOption(option);
+    window.addEventListener('resize', () => myChart.resize());
+}
+
 console.log("JavaScript do FinBoard carregado com sucesso! 🚀");
