@@ -481,6 +481,40 @@ def daily_summary(request):
         'values': hourly_pl_values
     }
 
+    gains = [r for r in period_results_brl if r > 0]
+    losses = [r for r in period_results_brl if r < 0]
+
+    avg_gain = sum(gains) / len(gains) if gains else 0
+    avg_loss = sum(losses) / len(losses) if losses else 0
+
+    risk_reward_ratio = 0
+    if avg_loss != 0:
+        risk_reward_ratio = abs(avg_gain / avg_loss)
+
+    avg_gain = round(avg_gain, 2)
+    avg_loss = round(avg_loss, 2)
+    risk_reward_ratio = round(risk_reward_ratio, 2)
+
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
+
+    if not start_date_str or not end_date_str:
+        # Se não houver datas na URL, verifica a sessão
+        start_date_s = request.session.get(
+            'summary_start_date', today.strftime('%Y-%m-%d'))
+        end_date_s = request.session.get(
+            'summary_end_date', today.strftime('%Y-%m-%d'))
+
+        # Redireciona para a URL correta com as datas da sessão/padrão
+        return redirect(f"{request.path}?start_date={start_date_s}&end_date={end_date_s}")
+
+    # Se chegamos aqui, as datas estão na URL, então as usamos e as salvamos na sessão
+    request.session['summary_start_date'] = start_date_str
+    request.session['summary_end_date'] = end_date_str
+
+    start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+    end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+
     context = {
         'start_date': start_date,
         'end_date': end_date,
@@ -497,6 +531,9 @@ def daily_summary(request):
         'asset_performance': asset_performance,
         'direction_performance': direction_performance,
         'hourly_chart_data_json': json.dumps(hourly_chart_data),
+        'avg_gain': avg_gain,
+        'avg_loss': avg_loss,
+        'risk_reward_ratio': risk_reward_ratio,
     }
 
     return render(request, 'dashboard/daily_summary.html', context)

@@ -31,7 +31,7 @@
     </div>
 
     <!-- Cards Resumo -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div class="bg-gray-800 rounded-xl shadow-lg p-6">
             <h3 class="text-sm font-medium text-gray-400">P/L do Dia (BRL)</h3>
             <p class="text-3xl font-bold mt-2 font-mono {% if total_pl_period > 0 %}text-green-400{% elif total_pl_period < 0 %}text-red-400{% else %}text-gray-200{% endif %}">
@@ -73,6 +73,33 @@
             <p class="text-3xl font-bold mt-2 font-mono text-red-400">
                 {{ max_loss|format_currency:"BRL" }}
             </p>
+        </div>
+    </div>
+    <div class="space-y-8 mb-8">
+        <div class="bg-gray-800 rounded-xl shadow-2xl p-6">
+            <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-2">
+                Gestão de Risco
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                <div>
+                    <h4 class="text-sm text-gray-400">Gain Médio</h4>
+                    <p class="text-xl font-mono font-bold text-green-400 mt-1">
+                        {{ avg_gain|format_currency:"BRL" }}
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-sm text-gray-400">Loss Médio</h4>
+                    <p class="text-xl font-mono font-bold text-red-400 mt-1">
+                        {{ avg_loss|format_currency:"BRL" }}
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-sm text-gray-400">Risco x Retorno</h4>
+                    <p class="text-xl font-mono font-bold text-indigo-400 mt-1">
+                        1 : {{ risk_reward_ratio|floatformat:2 }}
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 
