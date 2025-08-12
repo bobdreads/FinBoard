@@ -30,11 +30,3 @@
     scrollbar-color: #4b5563 #1f2937;
 }
 
-/* Cabeçalho fixo nas tabelas com scroll */
-.overflow-auto,
-.overflow-x-auto thead th h3 div{
-    position: sticky;
-    top: 0;
-    background-color: #374151; /* bg-gray-700 */
-    z-index: 10;
-}

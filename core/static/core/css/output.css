@@ -964,12 +964,32 @@ select {
   height: 100%;
 }
 
-.h-\[1100px\] {
-  height: 1100px;
+.h-\[260px\] {
+  height: 260px;
 }
 
-.h-\[2000px\] {
-  height: 2000px;
+.h-\[1080px\] {
+  height: 1080px;
+}
+
+.h-\[280px\] {
+  height: 280px;
+}
+
+.h-\[200px\] {
+  height: 200px;
+}
+
+.h-\[220px\] {
+  height: 220px;
+}
+
+.h-\[206px\] {
+  height: 206px;
+}
+
+.h-\[248\2c 5px\] {
+  height: 248,5px;
 }
 
 .min-h-screen {
