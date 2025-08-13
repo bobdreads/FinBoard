@@ -1,9 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
-# Importe F para referenciar campos
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.db.models import Sum, Case, When, F, Min, Max
-from decimal import Decimal  # Importe Decimal para cálculos precisos
+
+from decimal import Decimal
+
 
 # --- NOVOS MODELOS ---
 
@@ -223,3 +226,22 @@ class Attachment(models.Model):
     file = models.ImageField("Arquivo", upload_to='trade_attachments/')
     description = models.CharField("Descrição", max_length=150)
     def __str__(self): return f"Anexo para a Operação #{self.operation.id}"
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    monthly_profit_goal = models.DecimalField(
+        "Meta de Lucro Mensal (BRL)", max_digits=12, decimal_places=2, default=1000.00)
+    win_rate_goal = models.DecimalField("Meta de Taxa de Acerto (%)", max_digits=5, decimal_places=2, default=60.00, validators=[
+                                        MinValueValidator(0), MaxValueValidator(100)])
+
+    def __str__(self):
+        return f'Perfil de {self.user.username}'
+
+# --- SINAL PARA CRIAÇÃO AUTOMÁTICA DO PERFIL ---
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)

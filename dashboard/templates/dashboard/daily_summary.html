@@ -37,14 +37,25 @@
             <p class="text-3xl font-bold mt-2 font-mono {% if total_pl_period > 0 %}text-green-400{% elif total_pl_period < 0 %}text-red-400{% else %}text-gray-200{% endif %}">
                 {{ total_pl_period|format_currency:"BRL" }}
             </p>
+            <p class="text-xs mt-1 font-mono {% if pl_change > 0 %}text-green-400{% elif pl_change < 0 %}text-red-400{% else %}text-gray-400{% endif %}">
+                {% if pl_change > 0 %}▲{% elif pl_change < 0 %}▼{% endif %}
+                {{ pl_change|floatformat:1 }}% vs. período anterior
+            </p>
         </div>
         <div class="bg-gray-800 rounded-xl shadow-lg p-6">
             <h3 class="text-sm font-medium text-gray-400">Nº de Trades</h3>
             <p class="text-3xl font-bold mt-2 text-white">{{ trade_count_period }}</p>
+            <p class="text-xs mt-1 font-mono {% if trade_count_change > 0 %}text-green-400{% elif trade_count_change < 0 %}text-red-400{% else %}text-gray-400{% endif %}">
+                {% if trade_count_change > 0 %}▲{% elif trade_count_change < 0 %}▼{% endif %}
+                {{ trade_count_change|floatformat:1 }}% vs. período anterior
+            </p>
         </div>
         <div class="bg-gray-800 rounded-xl shadow-lg p-6">
             <h3 class="text-sm font-medium text-gray-400">Taxa de Acerto</h3>
             <p class="text-3xl font-bold mt-2 text-indigo-400">{{ win_rate_period|floatformat:1 }}%</p>
+            <p class="text-xs mt-1 font-mono {% if win_rate_change > 0 %}text-green-400{% elif win_rate_change < 0 %}text-red-400{% else %}text-gray-400{% endif %}">
+                {% if win_rate_change > 0 %}+{% endif %}{{ win_rate_change|floatformat:1 }} p.p. vs. período anterior
+            </p>
         </div>
         <div class="bg-gray-800 rounded-xl shadow-lg p-6">
             <h3 class="text-sm font-medium text-gray-400">Resultado Médio (BRL)</h3>
@@ -179,7 +190,7 @@
         </div>
 
         <!-- 3 - Ativo -->
-        <div class="col-span-2 col-start-3 row-start-2 bg-gray-800 rounded-xl shadow-2xl overflow-auto h-[240px]">
+        <div class="col-span-2 col-start-3 row-start-3 bg-gray-800 rounded-xl shadow-2xl overflow-auto h-[240px]">
             <h3 class="px-6 py-4 text-lg font-semibold text-white border-b border-gray-700">
                 Desempenho por Ativo
             </h3>
@@ -214,7 +225,7 @@
         </div>
 
         <!-- 4 - Direção -->
-        <div class="col-span-2 col-start-3 row-start-3 bg-gray-800 rounded-xl shadow-2xl overflow-auto h-[240px]">
+        <div class="col-span-2 col-start-3 row-start-4 bg-gray-800 rounded-xl shadow-2xl overflow-auto h-[240px]">
             <h3 class="px-6 py-4 text-lg font-semibold text-white border-b border-gray-700">
                 Desempenho por Direção
             </h3>
@@ -246,10 +257,6 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-
-        <!-- 5 - Gráfico -->
-        <div class="col-span-2 col-start-3 row-start-4 bg-gray-800 rounded-xl shadow-2xl p-6 h-[240px]">
         </div>
     </div>
 </div>

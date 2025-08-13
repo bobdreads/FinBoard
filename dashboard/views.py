@@ -466,6 +466,40 @@ def daily_summary(request):
             direction_performance[direction_name]['total_pl'] += result_brl
             direction_performance[direction_name]['trade_count'] += 1
 
+    # --- CÁLCULO PARA O PERÍODO ANTERIOR ---
+    period_duration = (end_date - start_date).days + 1
+    prev_start_date = start_date - timedelta(days=period_duration)
+    prev_end_date = start_date - timedelta(days=1)
+
+    prev_period_ops = Operation.objects.filter(
+        user=request.user,
+        status='FECHADA',
+        end_date__date__range=[prev_start_date, prev_end_date]
+    )
+
+    # --- KPIs DO PERÍODO ANTERIOR ---
+    prev_period_results_brl = [convert_to_brl(op.net_financial_result, op.account.currency, op.end_date)
+                               for op in prev_period_ops if op.net_financial_result is not None]
+
+    total_pl_prev_period = sum(prev_period_results_brl)
+    trade_count_prev_period = prev_period_ops.count()
+    winning_trades_prev_period = len(
+        [r for r in prev_period_results_brl if r > 0])
+    win_rate_prev_period = (winning_trades_prev_period /
+                            trade_count_prev_period * 100) if trade_count_prev_period > 0 else 0
+
+    # --- CÁLCULO DA VARIAÇÃO PERCENTUAL ---
+    def calculate_change(current, previous):
+        if previous == 0:
+            return float('inf') if current > 0 else 0
+        return ((current - previous) / abs(previous)) * 100
+
+    pl_change = calculate_change(total_pl_period, total_pl_prev_period)
+    trade_count_change = calculate_change(
+        trade_count_period, trade_count_prev_period)
+    # Variação de ponto percentual é mais simples
+    win_rate_change = win_rate_period - win_rate_prev_period
+
     context = {
         'start_date': start_date,
         'end_date': end_date,
@@ -484,6 +518,9 @@ def daily_summary(request):
         'avg_gain': avg_gain,
         'avg_loss': avg_loss,
         'risk_reward_ratio': risk_reward_ratio,
+        'pl_change': pl_change,
+        'trade_count_change': trade_count_change,
+        'win_rate_change': win_rate_change,
     }
 
     return render(request, 'dashboard/daily_summary.html', context)

@@ -6,7 +6,7 @@ from django.utils import timezone
 from datetime import date, timedelta
 from django.contrib.auth import login
 from django.db.models import Sum, Count
-from dashboard.models import Operation, Account
+from dashboard.models import Operation, Account, Profile
 from .forms import SignUpForm
 from dashboard.currency_converter import convert_to_brl
 from collections import defaultdict
@@ -48,6 +48,11 @@ def home(request):
     Renderiza o dashboard principal com KPIs dinâmicos e gráficos interativos.
     """
     today = timezone.localtime(timezone.now()).date()
+
+    operations = Operation.objects.filter(user=request.user)
+    closed_operations = operations.filter(
+        status='FECHADA', end_date__isnull=False)
+
     user_accounts = Account.objects.filter(user=request.user, is_active=True)
     all_closed_ops = Operation.objects.filter(
         user=request.user, status='FECHADA', end_date__isnull=False)
@@ -99,6 +104,27 @@ def home(request):
     losing_trades = all_closed_ops.filter(net_financial_result__lt=0).count()
     win_rate = (winning_trades / trade_count * 100) if trade_count > 0 else 0
 
+    user_profile, created = Profile.objects.get_or_create(user=request.user)
+
+    profit_goal = user_profile.monthly_profit_goal
+    win_rate_goal = user_profile.win_rate_goal
+    # 2. Calcula o P/L e a Taxa de Acerto apenas para o MÊS ATUAL
+    month_ops = closed_operations.filter(
+        end_date__year=today.year, end_date__month=today.month)
+
+    gains_this_month = sum(convert_to_brl(op.net_financial_result, op.account.currency,
+                           op.end_date) for op in month_ops if op.net_financial_result)
+
+    month_trade_count = month_ops.count()
+    month_winning_trades = month_ops.filter(net_financial_result__gt=0).count()
+    month_win_rate = (month_winning_trades / month_trade_count *
+                      100) if month_trade_count > 0 else 0
+
+    # 3. Calcula o percentual de progresso para a meta de lucro
+    profit_progress_percentage = 0
+    if profit_goal > 0:
+        profit_progress_percentage = (gains_this_month / profit_goal) * 100
+
     # --- Dados para os Gráficos (sem alterações) ---
     chart_data = get_equity_curve_data_for_echarts(request.user.id)
 
@@ -118,6 +144,11 @@ def home(request):
         'losing_trades': losing_trades,
         'chart_data': chart_data,
         'total_pl': total_pl_converted,
+        'profit_goal': profit_goal,
+        'gains_this_month': gains_this_month,
+        'profit_progress_percentage': profit_progress_percentage,
+        'win_rate_goal': win_rate_goal,
+        'month_win_rate': month_win_rate,
 
     }
     return render(request, 'core/home.html', context)

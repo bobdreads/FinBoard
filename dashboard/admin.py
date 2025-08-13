@@ -1,11 +1,30 @@
 from django.contrib import admin
-# Importe os novos modelos aqui!
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
+
 from .models import (
     Account, Transaction, Asset, Strategy, Tag,
-    Operation, Movement, Attachment
+    Operation, Movement, Attachment, Profile
 )
 
 # --- Registrando os Novos Modelos de Gestão de Capital ---
+
+
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    can_delete = False
+    verbose_name_plural = 'Metas do Perfil'
+
+# --- Define uma nova classe UserAdmin ---
+
+
+class UserAdmin(BaseUserAdmin):
+    inlines = (ProfileInline,)
+
+
+# --- Re-registra o User admin ---
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
 
 
 @admin.register(Account)

@@ -5,7 +5,7 @@
 {% block title %}Dashboard - FinBoard{% endblock %}
 
 {% block extra_head %}
-    <link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dash.css' %}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.3.3/echarts.min.js"></script>
     {{ form.media.css }}
 {% endblock %}
@@ -55,9 +55,9 @@
                 {{ year_percentage|floatformat:2 }}% do saldo
             </p>
         </div>
-        <div class="bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col justify-between">
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
             <h3 class="text-sm font-medium text-gray-400">Resultado Total</h3>
-            <p class="text-3xl font-bold mt-2 font-mono {% if total_pl > 0 %} text-green-400 {% else %} text-red-400 {% endif %}">
+            <p class="text-3xl font-bold mt-2 {% if total_pl > 0 %} text-green-400 {% else %} text-red-400 {% endif %}">
                 R$ {{ total_pl|floatformat:2 }}
             </p>
         </div>
@@ -73,6 +73,31 @@
                 <span>-</span>
                 <span class="font-bold text-red-400">{{ losing_trades }}L</span>
             </p>
+        </div>
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+            <h3 class="text-sm font-medium text-gray-400">Meta de Lucro Mensal</h3>
+            <p class="text-xl font-bold mt-1 text-white">
+                <span class="{% if gains_this_month >= profit_goal %}text-green-400{% else %}text-indigo-400{% endif %}">
+                    {{ gains_this_month|format_currency:"BRL" }}
+                </span>
+                <span class="text-sm text-gray-500">/ {{ profit_goal|format_currency:"BRL" }}</span>
+            </p>
+            <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2">
+                <div class="bg-indigo-600 h-2.5 rounded-full" style="width: {{ profit_progress_percentage|floatformat:0 }}%"></div>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+            <h3 class="text-sm font-medium text-gray-400">Meta de Taxa de Acerto</h3>
+            <p class="text-xl font-bold mt-1 text-white">
+                <span class="{% if month_win_rate >= win_rate_goal %}text-green-400{% else %}text-indigo-400{% endif %}">
+                    {{ month_win_rate|floatformat:1 }}%
+                </span>
+                <span class="text-sm text-gray-500">/ {{ win_rate_goal|floatformat:1 }}%</span>
+            </p>
+             <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2">
+                <div class="bg-indigo-600 h-2.5 rounded-full" style="width: {{ month_win_rate|floatformat:0 }}%"></div>
+            </div>
         </div>
     </div>
     <div class="bg-gray-800 rounded-xl shadow-2xl p-4 mb-8">
