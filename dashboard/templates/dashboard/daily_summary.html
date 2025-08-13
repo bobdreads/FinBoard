@@ -250,21 +250,9 @@
 
         <!-- 5 - Gráfico -->
         <div class="col-span-2 col-start-3 row-start-4 bg-gray-800 rounded-xl shadow-2xl p-6 h-[240px]">
-            <h3 class="text-lg font-semibold text-white text-center mb-4">
-                Desempenho por Hora de Abertura (BRL)
-            </h3>
-            <div id="hourly-performance-chart" style="width: 100%; height:180px;"></div>
         </div>
     </div>
 </div>
 
-{{ hourly_chart_data_json|json_script:"hourly-chart-data-json" }}
 
-<script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof renderHourlyPerformanceChart === 'function') {
-            renderHourlyPerformanceChart();
-        }
-    });
-</script>
 {% endblock %}

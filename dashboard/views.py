@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.forms import inlineformset_factory
 from django.db import transaction, IntegrityError
 from django.db.models import Sum, Count, Avg, Max, Min, F, ExpressionWrapper, fields
+from django.db.models.functions import TruncHour
 from django.utils import timezone
 
 import json
@@ -365,32 +366,42 @@ def strategy_delete(request, pk):
 @login_required
 def daily_summary(request):
     """
-    Exibe um resumo de performance para um período de tempo selecionado. (VERSÃO SIMPLIFICADA)
+    Exibe um resumo de performance para um período de tempo selecionado. (VERSÃO CORRIGIDA E REATORADA)
     """
     today = timezone.localtime(timezone.now()).date()
 
-    # --- LÓGICA DE DATAS SIMPLIFICADA ---
-    # Pega as datas do request, ou usa a data de hoje como padrão para ambas
-    start_date_str = request.GET.get('start_date', today.strftime('%Y-%m-%d'))
-    end_date_str = request.GET.get('end_date', today.strftime('%Y-%m-%d'))
+    # --- 1. LÓGICA DE DATAS CENTRALIZADA ---
+    # Garante que as datas estejam sempre na URL, buscando da sessão se necessário.
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
+
+    if not start_date_str or not end_date_str:
+        start_date_s = request.session.get(
+            'summary_start_date', today.strftime('%Y-%m-%d'))
+        end_date_s = request.session.get(
+            'summary_end_date', today.strftime('%Y-%m-%d'))
+        return redirect(f"{request.path}?start_date={start_date_s}&end_date={end_date_s}")
+
+    # Salva as datas válidas na sessão para persistência
+    request.session['summary_start_date'] = start_date_str
+    request.session['summary_end_date'] = end_date_str
 
     start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
     end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
 
-    # Filtra operações fechadas no intervalo
+    # --- 2. QUERYSET PRINCIPAL ---
+    # Todas as métricas usarão este mesmo queryset para consistência.
     period_ops = Operation.objects.filter(
         user=request.user,
         status='FECHADA',
         end_date__date__range=[start_date, end_date]
-    ).order_by('end_date')
+    ).select_related('strategy', 'asset', 'account').order_by('end_date')
 
-    # --- CÁLCULO DOS KPIs (sem alterações na lógica) ---
-    total_time_in_trades = timedelta()
-    max_drawdown = 0
-
+    # --- 3. CÁLCULOS DE KPI (usando period_ops) ---
     period_results_brl = [convert_to_brl(op.net_financial_result, op.account.currency, op.end_date)
                           for op in period_ops if op.net_financial_result is not None]
 
+    # (O restante da sua lógica de KPI continua aqui, sem alterações)
     total_pl_period = sum(period_results_brl)
     trade_count_period = period_ops.count()
     winning_trades_period = len([r for r in period_results_brl if r > 0])
@@ -398,44 +409,43 @@ def daily_summary(request):
                        trade_count_period * 100) if trade_count_period > 0 else 0
     avg_result_period = round(
         sum(period_results_brl) / len(period_results_brl) if period_results_brl else 0, 2)
-    max_gain = 0
-    max_loss = 0
-    if period_results_brl:
-        max_gain = max(period_results_brl)
-        # Encontramos o menor valor (o maior prejuízo) e o tornamos positivo para exibição
-        max_loss = min(period_results_brl)
+    max_gain = max(period_results_brl) if period_results_brl else 0
+    max_loss = min(period_results_brl) if period_results_brl else 0
 
+    total_time_in_trades = timedelta()
     if period_ops.exists():
         for op in period_ops:
             if op.end_date and op.start_date:
                 total_time_in_trades += op.end_date - op.start_date
 
-        peak = 0
-        cumulative_pl = 0
-        for result in period_results_brl:
-            cumulative_pl += result
-            if cumulative_pl > peak:
-                peak = cumulative_pl
-            drawdown = peak - cumulative_pl
-            if drawdown > max_drawdown:
-                max_drawdown = drawdown
+    peak = 0
+    cumulative_pl = 0
+    max_drawdown = 0
+    for result in period_results_brl:
+        cumulative_pl += result
+        if cumulative_pl > peak:
+            peak = cumulative_pl
+        drawdown = peak - cumulative_pl
+        if drawdown > max_drawdown:
+            max_drawdown = drawdown
 
+    gains = [r for r in period_results_brl if r > 0]
+    losses = [r for r in period_results_brl if r < 0]
+    avg_gain = round(sum(gains) / len(gains) if gains else 0, 2)
+    avg_loss = round(sum(losses) / len(losses) if losses else 0, 2)
+    risk_reward_ratio = round(abs(avg_gain / avg_loss)
+                              if avg_loss != 0 else 0, 2)
+
+    # (Lógicas de performance por estratégia, ativo e direção continuam aqui)
     strategy_performance = defaultdict(
         lambda: {'total_pl': 0, 'trade_count': 0})
-
     for op in period_ops:
-        # Usa o nome da estratégia ou "N/A" se nenhuma for definida
         strategy_name = op.strategy.name if op.strategy else "N/A"
-
         result_brl = convert_to_brl(
             op.net_financial_result, op.account.currency, op.end_date)
-
         if result_brl is not None:
             strategy_performance[strategy_name]['total_pl'] += result_brl
             strategy_performance[strategy_name]['trade_count'] += 1
-
-    # Converte o defaultdict para um dict normal para o template
-    strategy_performance = dict(strategy_performance)
 
     asset_performance = defaultdict(lambda: {'total_pl': 0, 'trade_count': 0})
     for op in period_ops:
@@ -445,75 +455,16 @@ def daily_summary(request):
         if result_brl is not None:
             asset_performance[asset_ticker]['total_pl'] += result_brl
             asset_performance[asset_ticker]['trade_count'] += 1
-    asset_performance = dict(asset_performance)
 
     direction_performance = defaultdict(
         lambda: {'total_pl': 0, 'trade_count': 0})
     for op in period_ops:
-        # O modelo armazena 'COMPRA' ou 'VENDA'
-        # Pega o nome amigável ("Compra" ou "Venda")
         direction_name = op.get_initial_operation_type_display()
         result_brl = convert_to_brl(
             op.net_financial_result, op.account.currency, op.end_date)
         if result_brl is not None:
             direction_performance[direction_name]['total_pl'] += result_brl
             direction_performance[direction_name]['trade_count'] += 1
-    direction_performance = dict(direction_performance)
-
-    hourly_performance = defaultdict(lambda: {'total_pl': 0, 'trade_count': 0})
-    for op in period_ops:
-        # Extrai a hora da data de início da operação
-        hour = op.start_date.hour
-        result_brl = convert_to_brl(
-            op.net_financial_result, op.account.currency, op.end_date)
-        if result_brl is not None:
-            hourly_performance[hour]['total_pl'] += result_brl
-            hourly_performance[hour]['trade_count'] += 1
-
-    # Prepara os dados para o gráfico ECharts
-    hours = list(range(24))  # Eixo X: 0h a 23h
-    hourly_pl_values = [round(float(hourly_performance.get(
-        h, {}).get('total_pl', 0)), 2) for h in hours]
-
-    hourly_chart_data = {
-        # Formata para "09h", "10h", etc.
-        'hours': [f"{h:02d}h" for h in hours],
-        'values': hourly_pl_values
-    }
-
-    gains = [r for r in period_results_brl if r > 0]
-    losses = [r for r in period_results_brl if r < 0]
-
-    avg_gain = sum(gains) / len(gains) if gains else 0
-    avg_loss = sum(losses) / len(losses) if losses else 0
-
-    risk_reward_ratio = 0
-    if avg_loss != 0:
-        risk_reward_ratio = abs(avg_gain / avg_loss)
-
-    avg_gain = round(avg_gain, 2)
-    avg_loss = round(avg_loss, 2)
-    risk_reward_ratio = round(risk_reward_ratio, 2)
-
-    start_date_str = request.GET.get('start_date')
-    end_date_str = request.GET.get('end_date')
-
-    if not start_date_str or not end_date_str:
-        # Se não houver datas na URL, verifica a sessão
-        start_date_s = request.session.get(
-            'summary_start_date', today.strftime('%Y-%m-%d'))
-        end_date_s = request.session.get(
-            'summary_end_date', today.strftime('%Y-%m-%d'))
-
-        # Redireciona para a URL correta com as datas da sessão/padrão
-        return redirect(f"{request.path}?start_date={start_date_s}&end_date={end_date_s}")
-
-    # Se chegamos aqui, as datas estão na URL, então as usamos e as salvamos na sessão
-    request.session['summary_start_date'] = start_date_str
-    request.session['summary_end_date'] = end_date_str
-
-    start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-    end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
 
     context = {
         'start_date': start_date,
@@ -525,12 +476,11 @@ def daily_summary(request):
         'avg_result_period': avg_result_period,
         'total_time_in_trades': total_time_in_trades,
         'max_drawdown': max_drawdown,
-        'strategy_performance': strategy_performance,
+        'strategy_performance': dict(strategy_performance),
         'max_gain': max_gain,
         'max_loss': max_loss,
-        'asset_performance': asset_performance,
-        'direction_performance': direction_performance,
-        'hourly_chart_data_json': json.dumps(hourly_chart_data),
+        'asset_performance': dict(asset_performance),
+        'direction_performance': dict(direction_performance),
         'avg_gain': avg_gain,
         'avg_loss': avg_loss,
         'risk_reward_ratio': risk_reward_ratio,
