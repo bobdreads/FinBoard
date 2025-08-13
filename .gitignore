@@ -16,3 +16,5 @@ node_modules/
 .env
 
 main.bundle.js
+
+db.sqlite3
