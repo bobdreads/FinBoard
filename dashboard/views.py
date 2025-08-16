@@ -1,3 +1,6 @@
+import json
+import numpy as np
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.forms import inlineformset_factory
@@ -6,7 +9,6 @@ from django.db.models import Sum, Count, Avg, Max, Min, F, ExpressionWrapper, fi
 from django.db.models.functions import TruncHour
 from django.utils import timezone
 
-import json
 from decimal import Decimal
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -398,19 +400,19 @@ def daily_summary(request):
     ).select_related('strategy', 'asset', 'account').order_by('end_date')
 
     # --- 3. CÁLCULOS DE KPI (usando period_ops) ---
-    period_results_brl = [convert_to_brl(op.net_financial_result, op.account.currency, op.end_date)
-                          for op in period_ops if op.net_financial_result is not None]
+    raw_results = [convert_to_brl(op.net_financial_result, op.account.currency, op.end_date)
+                   for op in period_ops if op.net_financial_result is not None]
 
     # (O restante da sua lógica de KPI continua aqui, sem alterações)
-    total_pl_period = sum(period_results_brl)
+    total_pl_period = sum(raw_results)
     trade_count_period = period_ops.count()
-    winning_trades_period = len([r for r in period_results_brl if r > 0])
+    winning_trades_period = len([r for r in raw_results if r > 0])
     win_rate_period = (winning_trades_period /
                        trade_count_period * 100) if trade_count_period > 0 else 0
     avg_result_period = round(
-        sum(period_results_brl) / len(period_results_brl) if period_results_brl else 0, 2)
-    max_gain = max(period_results_brl) if period_results_brl else 0
-    max_loss = min(period_results_brl) if period_results_brl else 0
+        sum(raw_results) / len(raw_results) if raw_results else 0, 2)
+    max_gain = max(raw_results) if raw_results else 0
+    max_loss = min(raw_results) if raw_results else 0
 
     total_time_in_trades = timedelta()
     if period_ops.exists():
@@ -421,7 +423,7 @@ def daily_summary(request):
     peak = 0
     cumulative_pl = 0
     max_drawdown = 0
-    for result in period_results_brl:
+    for result in raw_results:
         cumulative_pl += result
         if cumulative_pl > peak:
             peak = cumulative_pl
@@ -429,8 +431,8 @@ def daily_summary(request):
         if drawdown > max_drawdown:
             max_drawdown = drawdown
 
-    gains = [r for r in period_results_brl if r > 0]
-    losses = [r for r in period_results_brl if r < 0]
+    gains = [r for r in raw_results if r > 0]
+    losses = [r for r in raw_results if r < 0]
     avg_gain = round(sum(gains) / len(gains) if gains else 0, 2)
     avg_loss = round(sum(losses) / len(losses) if losses else 0, 2)
     risk_reward_ratio = round(abs(avg_gain / avg_loss)
@@ -500,6 +502,27 @@ def daily_summary(request):
     # Variação de ponto percentual é mais simples
     win_rate_change = win_rate_period - win_rate_prev_period
 
+    # --- DADOS PARA O HISTOGRAMA DE RESULTADOS ---
+    period_results_brl = [float(r) for r in raw_results if r is not None]
+
+    histogram_data = {}
+    if period_results_brl:
+        # Usa a função histogram do NumPy para calcular as faixas (bins) e a contagem
+        # Definimos 20 faixas, mas você pode ajustar este número
+        counts, bin_edges = np.histogram(period_results_brl, bins=20)
+
+        # Prepara os dados para o ECharts
+        bin_labels = []
+        for i in range(len(bin_edges) - 1):
+            # Cria rótulos legíveis para cada faixa, ex: "R$ 10.00 a R$ 20.00"
+            label = f"R$ {bin_edges[i]:.2f} a R$ {bin_edges[i+1]:.2f}"
+            bin_labels.append(label)
+
+        histogram_data = {
+            'labels': bin_labels,
+            'counts': counts.tolist(),  # Converte o array do numpy para uma lista python
+        }
+
     context = {
         'start_date': start_date,
         'end_date': end_date,
@@ -521,6 +544,7 @@ def daily_summary(request):
         'pl_change': pl_change,
         'trade_count_change': trade_count_change,
         'win_rate_change': win_rate_change,
+        'histogram_data': json.dumps(histogram_data),
     }
 
     return render(request, 'dashboard/daily_summary.html', context)

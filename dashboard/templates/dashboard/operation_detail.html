@@ -12,7 +12,7 @@
                     {{ operation.get_initial_operation_type_display }} em {{ operation.start_date|date:"d/m/Y" }}
                 </p>
             </div>
-            <div class="mt-4 flex flex-shrink-0 md:ml-4 md:mt-0">
+            <div class="mt-4 flex flex-shrink-0 md:ml-4 md:mt-0 gap-4">
                 <a href="{% url 'dashboard:operation_edit' pk=operation.pk %}" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Editar</a>
                 <a href="{% url 'dashboard:operation_delete' pk=operation.pk %}" class="px-4 py-2 text-sm font-medium text-white bg-red-700 rounded-lg hover:bg-red-800">Excluir</a>
             </div>

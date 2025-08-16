@@ -1,5 +1,7 @@
 import * as echarts from 'echarts';
 
+window.echarts = echarts;
+
 console.log("JavaScript do FinBoard carregado com sucesso! 🚀");
 
 // Esta função ficará disponível globalmente para ser chamada pelo template

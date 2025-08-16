@@ -115,10 +115,10 @@
     </div>
 
     <!-- GRID FIXO -->
-    <div class="grid grid-cols-4 grid-rows-4 gap-4 h-[1000px]">
+    <div class="grid grid-cols-4 grid-rows-3 gap-4 h-[800px]">
 
         <!-- 1 - Trades no Período -->
-        <div class="col-span-2 row-span-4 col-start-1 bg-gray-800 rounded-xl shadow-2xl overflow-auto">
+        <div class="col-span-2 row-span-3 col-start-1 bg-gray-800 rounded-xl shadow-2xl overflow-auto">
             <h3 class="px-6 py-4 text-lg font-semibold text-white border-b border-gray-700">
                 Trades no Período ({{ period_ops.count }})
             </h3>
@@ -155,7 +155,7 @@
         </div>
 
         <!-- 2 - Estratégia -->
-        <div class="col-span-2 col-start-3 bg-gray-800 rounded-xl shadow-2xl overflow-auto h-[240px]">
+        <div class="col-span-2 col-start-3 bg-gray-800 rounded-xl shadow-2xl overflow-auto ">
             <h3 class="px-6 py-4 text-lg font-semibold text-white border-b border-gray-700">
                 Desempenho por Estratégia
             </h3>
@@ -190,7 +190,7 @@
         </div>
 
         <!-- 3 - Ativo -->
-        <div class="col-span-2 col-start-3 row-start-3 bg-gray-800 rounded-xl shadow-2xl overflow-auto h-[240px]">
+        <div class="col-span-2 col-start-3 row-start-2 bg-gray-800 rounded-xl shadow-2xl overflow-auto ">
             <h3 class="px-6 py-4 text-lg font-semibold text-white border-b border-gray-700">
                 Desempenho por Ativo
             </h3>
@@ -225,7 +225,7 @@
         </div>
 
         <!-- 4 - Direção -->
-        <div class="col-span-2 col-start-3 row-start-4 bg-gray-800 rounded-xl shadow-2xl overflow-auto h-[240px]">
+        <div class="col-span-2 col-start-3 row-start-3 bg-gray-800 rounded-xl shadow-2xl overflow-auto ">
             <h3 class="px-6 py-4 text-lg font-semibold text-white border-b border-gray-700">
                 Desempenho por Direção
             </h3>
@@ -259,7 +259,86 @@
             </div>
         </div>
     </div>
+    <!-- 5 - Mapa de Calor -->
+    <div class="col-span-2 col-start-3 row-start-4 bg-gray-800 rounded-xl shadow-2xl mt-6">
+        <h3 class="px-6 py-4 text-lg font-semibold text-white border-b border-gray-700">
+            Distribuição de Resultados (P/L)
+        </h3>
+        <div id="histogram-chart" style="width: 100%; height: 400px;"></div>
+    </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Pega os dados que o backend enviou
+    const histogramData = {{ histogram_data|safe }};
+    const histogramChartDom = document.getElementById('histogram-chart');
 
+    // Verifica se o container existe e se há dados para exibir
+    if (histogramChartDom && histogramData && Object.keys(histogramData).length > 0) {
+        const histogramChart = echarts.init(histogramChartDom);
+
+        const option = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                },
+                formatter: function (params) {
+                    const data = params[0];
+                    const binLabel = data.name;
+                    const count = data.value;
+                    return `<b>Faixa:</b> ${binLabel}<br/><b>Nº de Trades:</b> ${count}`;
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                data: histogramData.labels,
+                axisLabel: {
+                    // Rotaciona os labels para não sobrepor
+                    rotate: 45,
+                    interval: 0 // Mostra todos os labels
+                }
+            },
+            yAxis: {
+                type: 'value',
+                name: 'Nº de Trades'
+            },
+            series: [{
+                name: 'Frequência',
+                type: 'bar',
+                data: histogramData.counts,
+                // Colore as barras: verde para lucro, vermelho para prejuízo
+                itemStyle: {
+                    color: function(params) {
+                        // Acessa o rótulo da faixa pelo índice
+                        const binLabel = histogramData.labels[params.dataIndex];
+                        // Extrai o primeiro número do rótulo
+                        const firstValue = parseFloat(binLabel.replace("R$ ", "").split(" ")[0]);
+                        return firstValue >= 0 ? '#6A994E' : '#D62828';
+                    }
+                }
+            }]
+        };
+
+        histogramChart.setOption(option);
+
+        window.addEventListener('resize', function() {
+            histogramChart.resize();
+        });
+
+    } else if (histogramChartDom) {
+        // Se não houver dados, exibe uma mensagem
+        histogramChartDom.innerHTML = `<div class="flex items-center justify-center h-full text-gray-500">
+            Não há dados de operações fechadas no período para gerar o histograma.
+        </div>`;
+    }
+});
+</script>
 
 {% endblock %}

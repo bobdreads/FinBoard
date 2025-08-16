@@ -144,6 +144,26 @@ document.addEventListener('DOMContentLoaded', function() {
             const formToRemove = e.target.closest('.movement-form');
             if (formToRemove) {
                 formToRemove.remove();
+
+                const remainingForms = movementsContainer.querySelectorAll('.movement-form');
+
+                // 1. Atualiza o contador total de formulários
+                totalFormsInput.value = remainingForms.length;
+
+                // 2. Re-indexa os atributos 'name' e 'id' de cada campo em cada formulário restante
+                remainingForms.forEach((form, index) => {
+                    form.querySelectorAll('input, select, textarea').forEach(input => {
+                        const nameRegex = /movements-\d+-/;
+                        const idRegex = /id_movements-\d+-/;
+
+                        if (input.name) {
+                            input.name = input.name.replace(nameRegex, `movements-${index}-`);
+                        }
+                        if (input.id) {
+                            input.id = input.id.replace(idRegex, `id_movements-${index}-`);
+                        }
+                    });
+                });
             }
         }
     });

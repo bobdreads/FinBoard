@@ -127,6 +127,13 @@
     }
     return map3;
   }
+  function setPlatformAPI(newPlatformApis) {
+    for (var key in platformApi) {
+      if (newPlatformApis[key]) {
+        platformApi[key] = newPlatformApis[key];
+      }
+    }
+  }
   var DEFAULT_FONT_SIZE, DEFAULT_FONT_FAMILY, DEFAULT_FONT, OFFSET, SCALE, defaultWidthMapStr, DEFAULT_TEXT_WIDTH_MAP, platformApi;
   var init_platform = __esm({
     "node_modules/zrender/lib/core/platform.js"() {
@@ -184,6 +191,60 @@
   });
 
   // node_modules/zrender/lib/core/util.js
+  var util_exports = {};
+  __export(util_exports, {
+    EPSILON: () => EPSILON,
+    HashMap: () => HashMap,
+    RADIAN_TO_DEGREE: () => RADIAN_TO_DEGREE,
+    assert: () => assert,
+    bind: () => bind,
+    clone: () => clone,
+    concatArray: () => concatArray,
+    createCanvas: () => createCanvas,
+    createHashMap: () => createHashMap,
+    createObject: () => createObject,
+    curry: () => curry,
+    defaults: () => defaults,
+    disableUserSelect: () => disableUserSelect,
+    each: () => each,
+    eqNaN: () => eqNaN,
+    extend: () => extend,
+    filter: () => filter,
+    find: () => find,
+    guid: () => guid,
+    hasOwn: () => hasOwn,
+    indexOf: () => indexOf,
+    inherits: () => inherits,
+    isArray: () => isArray,
+    isArrayLike: () => isArrayLike,
+    isBuiltInObject: () => isBuiltInObject,
+    isDom: () => isDom,
+    isFunction: () => isFunction,
+    isGradientObject: () => isGradientObject,
+    isImagePatternObject: () => isImagePatternObject,
+    isNumber: () => isNumber,
+    isObject: () => isObject,
+    isPrimitive: () => isPrimitive,
+    isRegExp: () => isRegExp,
+    isString: () => isString,
+    isStringSafe: () => isStringSafe,
+    isTypedArray: () => isTypedArray,
+    keys: () => keys,
+    logError: () => logError,
+    map: () => map,
+    merge: () => merge,
+    mergeAll: () => mergeAll,
+    mixin: () => mixin,
+    noop: () => noop,
+    normalizeCssArray: () => normalizeCssArray,
+    reduce: () => reduce,
+    retrieve: () => retrieve,
+    retrieve2: () => retrieve2,
+    retrieve3: () => retrieve3,
+    setAsPrimitive: () => setAsPrimitive,
+    slice: () => slice,
+    trim: () => trim
+  });
   function guid() {
     return idStart++;
   }
@@ -723,6 +784,34 @@
   });
 
   // node_modules/zrender/lib/core/vector.js
+  var vector_exports = {};
+  __export(vector_exports, {
+    add: () => add,
+    applyTransform: () => applyTransform,
+    clone: () => clone2,
+    copy: () => copy,
+    create: () => create,
+    dist: () => dist,
+    distSquare: () => distSquare,
+    distance: () => distance,
+    distanceSquare: () => distanceSquare,
+    div: () => div,
+    dot: () => dot,
+    len: () => len,
+    lenSquare: () => lenSquare,
+    length: () => length,
+    lengthSquare: () => lengthSquare,
+    lerp: () => lerp,
+    max: () => max,
+    min: () => min,
+    mul: () => mul,
+    negate: () => negate,
+    normalize: () => normalize,
+    scale: () => scale,
+    scaleAndAdd: () => scaleAndAdd,
+    set: () => set,
+    sub: () => sub
+  });
   function create(x, y) {
     if (x == null) {
       x = 0;
@@ -766,6 +855,19 @@
   function lenSquare(v) {
     return v[0] * v[0] + v[1] * v[1];
   }
+  function mul(out2, v12, v22) {
+    out2[0] = v12[0] * v22[0];
+    out2[1] = v12[1] * v22[1];
+    return out2;
+  }
+  function div(out2, v12, v22) {
+    out2[0] = v12[0] / v22[0];
+    out2[1] = v12[1] / v22[1];
+    return out2;
+  }
+  function dot(v12, v22) {
+    return v12[0] * v22[0] + v12[1] * v22[1];
+  }
   function scale(out2, v, s) {
     out2[0] = v[0] * s;
     out2[1] = v[1] * s;
@@ -787,6 +889,11 @@
   }
   function distanceSquare(v12, v22) {
     return (v12[0] - v22[0]) * (v12[0] - v22[0]) + (v12[1] - v22[1]) * (v12[1] - v22[1]);
+  }
+  function negate(out2, v) {
+    out2[0] = -v[0];
+    out2[1] = -v[1];
+    return out2;
   }
   function lerp(out2, v12, v22, t) {
     out2[0] = v12[0] + t * (v22[0] - v12[0]);
@@ -810,9 +917,11 @@
     out2[1] = Math.max(v12[1], v22[1]);
     return out2;
   }
-  var dist, distSquare;
+  var length, lengthSquare, dist, distSquare;
   var init_vector = __esm({
     "node_modules/zrender/lib/core/vector.js"() {
+      length = len;
+      lengthSquare = lenSquare;
       dist = distance;
       distSquare = distanceSquare;
     }
@@ -1406,6 +1515,18 @@
   });
 
   // node_modules/zrender/lib/core/matrix.js
+  var matrix_exports = {};
+  __export(matrix_exports, {
+    clone: () => clone3,
+    copy: () => copy2,
+    create: () => create2,
+    identity: () => identity,
+    invert: () => invert,
+    mul: () => mul2,
+    rotate: () => rotate,
+    scale: () => scale2,
+    translate: () => translate
+  });
   function create2() {
     return [1, 0, 0, 1, 0, 0];
   }
@@ -1427,7 +1548,7 @@
     out2[5] = m2[5];
     return out2;
   }
-  function mul(out2, m1, m2) {
+  function mul2(out2, m1, m2) {
     var out0 = m1[0] * m2[0] + m1[2] * m2[1];
     var out1 = m1[1] * m2[0] + m1[3] * m2[1];
     var out22 = m1[0] * m2[2] + m1[2] * m2[3];
@@ -2331,12 +2452,12 @@
       array[left] = pivot;
     }
   }
-  function gallopLeft(value, array, start2, length, hint, compare2) {
+  function gallopLeft(value, array, start2, length2, hint, compare2) {
     var lastOffset = 0;
     var maxOffset = 0;
     var offset = 1;
     if (compare2(value, array[start2 + hint]) > 0) {
-      maxOffset = length - hint;
+      maxOffset = length2 - hint;
       while (offset < maxOffset && compare2(value, array[start2 + hint + offset]) > 0) {
         lastOffset = offset;
         offset = (offset << 1) + 1;
@@ -2376,7 +2497,7 @@
     }
     return offset;
   }
-  function gallopRight(value, array, start2, length, hint, compare2) {
+  function gallopRight(value, array, start2, length2, hint, compare2) {
     var lastOffset = 0;
     var maxOffset = 0;
     var offset = 1;
@@ -2396,7 +2517,7 @@
       lastOffset = hint - offset;
       offset = hint - tmp;
     } else {
-      maxOffset = length - hint;
+      maxOffset = length2 - hint;
       while (offset < maxOffset && compare2(value, array[start2 + hint + offset]) >= 0) {
         lastOffset = offset;
         offset = (offset << 1) + 1;
@@ -3695,6 +3816,24 @@
   });
 
   // node_modules/zrender/lib/tool/color.js
+  var color_exports = {};
+  __export(color_exports, {
+    fastLerp: () => fastLerp,
+    fastMapToColor: () => fastMapToColor,
+    lerp: () => lerp2,
+    lift: () => lift,
+    liftColor: () => liftColor,
+    lum: () => lum,
+    mapToColor: () => mapToColor,
+    modifyAlpha: () => modifyAlpha,
+    modifyHSL: () => modifyHSL,
+    parse: () => parse,
+    parseCssFloat: () => parseCssFloat,
+    parseCssInt: () => parseCssInt,
+    random: () => random,
+    stringify: () => stringify,
+    toHex: () => toHex
+  });
   function clampCssByte(i) {
     i = Math.round(i);
     return i < 0 ? 0 : i > 255 ? 255 : i;
@@ -3920,6 +4059,12 @@
       return stringify(colorArr, colorArr.length === 4 ? "rgba" : "rgb");
     }
   }
+  function toHex(color3) {
+    var colorArr = parse(color3);
+    if (colorArr) {
+      return ((1 << 24) + (colorArr[0] << 16) + (colorArr[1] << 8) + +colorArr[2]).toString(16).slice(1);
+    }
+  }
   function fastLerp(normalizedValue, colors, out2) {
     if (!(colors && colors.length) || !(normalizedValue >= 0 && normalizedValue <= 1)) {
       return;
@@ -3991,6 +4136,13 @@
     var arr = parse(color3);
     return arr ? (0.299 * arr[0] + 0.587 * arr[1] + 0.114 * arr[2]) * arr[3] / 255 + (1 - arr[3]) * backgroundLum : 0;
   }
+  function random() {
+    return stringify([
+      Math.round(Math.random() * 255),
+      Math.round(Math.random() * 255),
+      Math.round(Math.random() * 255)
+    ], "rgb");
+  }
   function liftColor(color3) {
     if (isString(color3)) {
       var liftedColor = liftedColorCache.get(color3);
@@ -4011,7 +4163,7 @@
     }
     return color3;
   }
-  var kCSSColorTable, colorCache, lastRemovedArr, liftedColorCache;
+  var kCSSColorTable, colorCache, lastRemovedArr, fastMapToColor, mapToColor, liftedColorCache;
   var init_color = __esm({
     "node_modules/zrender/lib/tool/color.js"() {
       init_LRU();
@@ -4168,6 +4320,8 @@
       };
       colorCache = new LRU_default(20);
       lastRemovedArr = null;
+      fastMapToColor = fastLerp;
+      mapToColor = lerp2;
       liftedColorCache = new LRU_default(100);
     }
   });
@@ -5550,7 +5704,7 @@
           }
           if (parentTransform) {
             if (needLocalTransform) {
-              mul(m2, parentTransform, m2);
+              mul2(m2, parentTransform, m2);
             } else {
               copy2(m2, parentTransform);
             }
@@ -5614,7 +5768,7 @@
           var m2 = this.transform;
           if (parent && parent.transform) {
             parent.invTransform = parent.invTransform || create2();
-            mul(tmpTransform, parent.invTransform, m2);
+            mul2(tmpTransform, parent.invTransform, m2);
             m2 = tmpTransform;
           }
           var ox = this.originX;
@@ -5622,7 +5776,7 @@
           if (ox || oy) {
             originTransform[4] = ox;
             originTransform[5] = oy;
-            mul(tmpTransform, m2, originTransform);
+            mul2(tmpTransform, m2, originTransform);
             tmpTransform[4] -= ox;
             tmpTransform[5] -= oy;
             m2 = tmpTransform;
@@ -7143,6 +7297,17 @@
   });
 
   // node_modules/zrender/lib/zrender.js
+  var zrender_exports = {};
+  __export(zrender_exports, {
+    dispose: () => dispose,
+    disposeAll: () => disposeAll,
+    getElementSSRData: () => getElementSSRData,
+    getInstance: () => getInstance,
+    init: () => init,
+    registerPainter: () => registerPainter,
+    registerSSRDataGetter: () => registerSSRDataGetter,
+    version: () => version
+  });
   function delInstance(id) {
     delete instances[id];
   }
@@ -7169,6 +7334,20 @@
     instances[zr.id] = zr;
     return zr;
   }
+  function dispose(zr) {
+    zr.dispose();
+  }
+  function disposeAll() {
+    for (var key in instances) {
+      if (instances.hasOwnProperty(key)) {
+        instances[key].dispose();
+      }
+    }
+    instances = {};
+  }
+  function getInstance(id) {
+    return instances[id];
+  }
   function registerPainter(name, Ctor) {
     painterCtors[name] = Ctor;
   }
@@ -7180,7 +7359,7 @@
   function registerSSRDataGetter(getter) {
     ssrDataGetter = getter;
   }
-  var painterCtors, instances, ZRender, ssrDataGetter;
+  var painterCtors, instances, ZRender, ssrDataGetter, version;
   var init_zrender = __esm({
     "node_modules/zrender/lib/zrender.js"() {
       init_env();
@@ -7439,6 +7618,7 @@
         };
         return ZRender2;
       }();
+      version = "6.0.0";
     }
   });
 
@@ -7551,6 +7731,13 @@
     var sizeQuantity = Math.round(log2(mathAbs2(pixelExtent[1] - pixelExtent[0])) / LN10);
     var precision = Math.min(Math.max(-dataQuantity + sizeQuantity, 0), 20);
     return !isFinite(precision) ? 20 : precision;
+  }
+  function getPercentWithPrecision(valueList, idx, precision) {
+    if (!valueList[idx]) {
+      return 0;
+    }
+    var seats = getPercentSeats(valueList, precision);
+    return seats[idx] || 0;
   }
   function getPercentSeats(valueList, precision) {
     var sum2 = reduce(valueList, function(acc, val) {
@@ -8593,6 +8780,11 @@
   });
 
   // node_modules/zrender/lib/graphic/helper/parseText.js
+  function truncateText(text, containerWidth, font, ellipsis, options) {
+    var out2 = {};
+    truncateText2(out2, text, containerWidth, font, ellipsis, options);
+    return out2.text;
+  }
   function truncateText2(out2, text, containerWidth, font, ellipsis, options) {
     if (!containerWidth) {
       out2.text = "";
@@ -14408,7 +14600,7 @@
   function getTransform(target, ancestor) {
     var mat = identity([]);
     while (target && target !== ancestor) {
-      mul(mat, target.getLocalTransform(), mat);
+      mul2(mat, target.getLocalTransform(), mat);
       target = target.parent;
     }
     return mat;
@@ -16083,6 +16275,28 @@
     }
   });
 
+  // node_modules/echarts/lib/legacy/getTextRect.js
+  function getTextRect(text, font, align, verticalAlign, padding, rich, truncate, lineHeight) {
+    var textEl = new Text_default({
+      style: {
+        text,
+        font,
+        align,
+        verticalAlign,
+        padding,
+        rich,
+        overflow: truncate ? "truncate" : null,
+        lineHeight
+      }
+    });
+    return textEl.getBoundingRect();
+  }
+  var init_getTextRect = __esm({
+    "node_modules/echarts/lib/legacy/getTextRect.js"() {
+      init_graphic();
+    }
+  });
+
   // node_modules/echarts/lib/util/format.js
   function addCommas(x) {
     if (!isNumeric(x)) {
@@ -16184,6 +16398,28 @@
       };
     }
   }
+  function formatTime(tpl, value, isUTC) {
+    if (true) {
+      deprecateReplaceLog("echarts.format.formatTime", "echarts.time.format");
+    }
+    if (tpl === "week" || tpl === "month" || tpl === "quarter" || tpl === "half-year" || tpl === "year") {
+      tpl = "MM-dd\nyyyy";
+    }
+    var date = parseDate(value);
+    var getUTC = isUTC ? "getUTC" : "get";
+    var y = date[getUTC + "FullYear"]();
+    var M = date[getUTC + "Month"]() + 1;
+    var d = date[getUTC + "Date"]();
+    var h = date[getUTC + "Hours"]();
+    var m2 = date[getUTC + "Minutes"]();
+    var s = date[getUTC + "Seconds"]();
+    var S = date[getUTC + "Milliseconds"]();
+    tpl = tpl.replace("MM", pad(M, 2)).replace("M", M).replace("yyyy", y).replace("yy", pad(y % 100 + "", 2)).replace("dd", pad(d, 2)).replace("d", d).replace("hh", pad(h, 2)).replace("h", h).replace("mm", pad(m2, 2)).replace("m", m2).replace("ss", pad(s, 2)).replace("s", s).replace("SSS", pad(S, 3));
+    return tpl;
+  }
+  function capitalFirst(str) {
+    return str ? str.charAt(0).toUpperCase() + str.substr(1) : str;
+  }
   function convertToColorString(color3, defaultColor) {
     defaultColor = defaultColor || "transparent";
     return isString(color3) ? color3 : isObject(color3) ? color3.colorStops && (color3.colorStops[0] || {}).color || defaultColor : defaultColor;
@@ -16204,6 +16440,9 @@
       init_dom();
       init_number();
       init_time();
+      init_log();
+      init_parseText();
+      init_getTextRect();
       normalizeCssArray2 = normalizeCssArray;
       TPL_VAR_ALIAS = ["a", "b", "c", "d", "e", "f", "g"];
       wrapVar = function(varName, seriesIdx) {
@@ -24720,8 +24959,41 @@
     lifecycle_default.trigger("afterinit", chart);
     return chart;
   }
+  function connect(groupId) {
+    if (isArray(groupId)) {
+      var charts = groupId;
+      groupId = null;
+      each(charts, function(chart) {
+        if (chart.group != null) {
+          groupId = chart.group;
+        }
+      });
+      groupId = groupId || "g_" + groupIdBase++;
+      each(charts, function(chart) {
+        chart.group = groupId;
+      });
+    }
+    connectedGroups[groupId] = true;
+    return groupId;
+  }
+  function disconnect(groupId) {
+    connectedGroups[groupId] = false;
+  }
+  function dispose2(chart) {
+    if (isString(chart)) {
+      chart = instances2[chart];
+    } else if (!(chart instanceof ECharts)) {
+      chart = getInstanceByDom(chart);
+    }
+    if (chart instanceof ECharts && !chart.isDisposed()) {
+      chart.dispose();
+    }
+  }
   function getInstanceByDom(dom) {
     return instances2[getAttribute(dom, DOM_ATTRIBUTE_KEY)];
+  }
+  function getInstanceById(key) {
+    return instances2[key];
   }
   function registerTheme(name, theme2) {
     themeStorage[name] = theme2;
@@ -24798,6 +25070,15 @@
   function registerCoordinateSystem(type, coordSysCreator) {
     CoordinateSystem_default.register(type, coordSysCreator);
   }
+  function getCoordinateSystemDimensions(type) {
+    var coordSysCreator = CoordinateSystem_default.get(type);
+    if (coordSysCreator) {
+      return coordSysCreator.getDimensionsInfo ? coordSysCreator.getDimensionsInfo() : coordSysCreator.dimensions.slice();
+    }
+  }
+  function registerCustomSeries2(seriesType2, renderItem) {
+    registerCustomSeries(seriesType2, renderItem);
+  }
   function registerLayout(priority, layoutTask) {
     normalizeRegister(visualFuncs, priority, layoutTask, PRIORITY_VISUAL_LAYOUT, "layout");
   }
@@ -24829,9 +25110,21 @@
   function registerLoading(name, loadingFx) {
     loadingEffects[name] = loadingFx;
   }
+  function setCanvasCreator(creator) {
+    if (true) {
+      deprecateLog("setCanvasCreator is deprecated. Use setPlatformAPI({ createCanvas }) instead.");
+    }
+    setPlatformAPI({
+      createCanvas: creator
+    });
+  }
   function registerMap(mapName, geoJson, specialAreas) {
     var registerMap3 = getImpl("registerMap");
     registerMap3 && registerMap3(mapName, geoJson, specialAreas);
+  }
+  function getMap(mapName) {
+    var getMap2 = getImpl("getMap");
+    return getMap2 && getMap2(mapName);
   }
   function makeSelectChangedEvent(actionResultBatch, payload, ecModel, api) {
     return {
@@ -24841,7 +25134,7 @@
       }
     };
   }
-  var TEST_FRAME_REMAIN_TIME, PRIORITY_PROCESSOR_SERIES_FILTER, PRIORITY_PROCESSOR_DATASTACK, PRIORITY_PROCESSOR_FILTER, PRIORITY_PROCESSOR_DEFAULT, PRIORITY_PROCESSOR_STATISTIC, PRIORITY_VISUAL_LAYOUT, PRIORITY_VISUAL_PROGRESSIVE_LAYOUT, PRIORITY_VISUAL_GLOBAL, PRIORITY_VISUAL_CHART, PRIORITY_VISUAL_COMPONENT, PRIORITY_VISUAL_CHART_DATA_CUSTOM, PRIORITY_VISUAL_POST_CHART_LAYOUT, PRIORITY_VISUAL_BRUSH, PRIORITY_VISUAL_ARIA, PRIORITY_VISUAL_DECAL, PRIORITY, IN_MAIN_PROCESS_KEY, MAIN_PROCESS_VERSION_KEY, PENDING_UPDATE, STATUS_NEEDS_UPDATE_KEY, ACTION_REG, CONNECT_STATUS_KEY, CONNECT_STATUS_PENDING, CONNECT_STATUS_UPDATING, CONNECT_STATUS_UPDATED, MessageCenter, messageCenterProto, prepare, prepareView, updateDirectly, updateMethods, doConvertPixel, updateStreamModes, doDispatchAction, flushPendingActions, triggerUpdatedEvent, bindRenderedEvent, bindMouseEvent, render, renderComponents, renderSeries, createExtensionAPI, enableConnect, markStatusToUpdate, applyChangedStates, updateMainProcessVersion, ECharts, echartsProto, MOUSE_EVENT_NAMES, actions, connectionEventRevertMap, publicEventTypeMap, dataProcessorFuncs, optionPreprocessorFuncs, visualFuncs, themeStorage, loadingEffects, instances2, connectedGroups, idBase, groupIdBase, DOM_ATTRIBUTE_KEY, registeredTasks, registerTransform;
+  var version2, dependencies, TEST_FRAME_REMAIN_TIME, PRIORITY_PROCESSOR_SERIES_FILTER, PRIORITY_PROCESSOR_DATASTACK, PRIORITY_PROCESSOR_FILTER, PRIORITY_PROCESSOR_DEFAULT, PRIORITY_PROCESSOR_STATISTIC, PRIORITY_VISUAL_LAYOUT, PRIORITY_VISUAL_PROGRESSIVE_LAYOUT, PRIORITY_VISUAL_GLOBAL, PRIORITY_VISUAL_CHART, PRIORITY_VISUAL_COMPONENT, PRIORITY_VISUAL_CHART_DATA_CUSTOM, PRIORITY_VISUAL_POST_CHART_LAYOUT, PRIORITY_VISUAL_BRUSH, PRIORITY_VISUAL_ARIA, PRIORITY_VISUAL_DECAL, PRIORITY, IN_MAIN_PROCESS_KEY, MAIN_PROCESS_VERSION_KEY, PENDING_UPDATE, STATUS_NEEDS_UPDATE_KEY, ACTION_REG, CONNECT_STATUS_KEY, CONNECT_STATUS_PENDING, CONNECT_STATUS_UPDATING, CONNECT_STATUS_UPDATED, MessageCenter, messageCenterProto, prepare, prepareView, updateDirectly, updateMethods, doConvertPixel, updateStreamModes, doDispatchAction, flushPendingActions, triggerUpdatedEvent, bindRenderedEvent, bindMouseEvent, render, renderComponents, renderSeries, createExtensionAPI, enableConnect, markStatusToUpdate, applyChangedStates, updateMainProcessVersion, ECharts, echartsProto, MOUSE_EVENT_NAMES, actions, connectionEventRevertMap, publicEventTypeMap, dataProcessorFuncs, optionPreprocessorFuncs, visualFuncs, themeStorage, loadingEffects, instances2, connectedGroups, idBase, groupIdBase, DOM_ATTRIBUTE_KEY, disConnect, registeredTasks, registerTransform, dataTool;
   var init_echarts = __esm({
     "node_modules/echarts/lib/core/echarts.js"() {
       init_tslib_es6();
@@ -24881,6 +25174,12 @@
       init_lifecycle();
       init_platform();
       init_impl();
+      init_customSeriesRegister();
+      init_locale();
+      version2 = "6.0.0";
+      dependencies = {
+        zrender: "6.0.0"
+      };
       TEST_FRAME_REMAIN_TIME = 1;
       PRIORITY_PROCESSOR_SERIES_FILTER = 800;
       PRIORITY_PROCESSOR_DATASTACK = 900;
@@ -26465,6 +26764,7 @@
       idBase = +/* @__PURE__ */ new Date() - 0;
       groupIdBase = +/* @__PURE__ */ new Date() - 0;
       DOM_ATTRIBUTE_KEY = "_echarts_instance_";
+      disConnect = disconnect;
       registeredTasks = [];
       registerTransform = registerExternalTransform;
       registerVisual(PRIORITY_VISUAL_GLOBAL, seriesStyleTask);
@@ -26512,6 +26812,7 @@
       });
       registerTheme("default", {});
       registerTheme("dark", dark_default);
+      dataTool = {};
     }
   });
 
@@ -27687,6 +27988,9 @@
   });
 
   // node_modules/echarts/lib/data/helper/createDimensions.js
+  function createDimensions(source, opt) {
+    return prepareSeriesDataSchema(source, opt).dimensions;
+  }
   function prepareSeriesDataSchema(source, opt) {
     if (!isSourceInstance(source)) {
       source = createSourceFromSeriesDataOption(source);
@@ -30191,6 +30495,63 @@
     }
   });
 
+  // node_modules/echarts/lib/export/api/helper.js
+  var helper_exports2 = {};
+  __export(helper_exports2, {
+    createDimensions: () => createDimensions,
+    createList: () => createList,
+    createScale: () => createScale,
+    createSymbol: () => createSymbol,
+    createTextStyle: () => createTextStyle2,
+    dataStack: () => dataStack2,
+    enableHoverEmphasis: () => enableHoverEmphasis,
+    getECData: () => getECData,
+    getLayoutRect: () => getLayoutRect,
+    mixinAxisModelCommonMethods: () => mixinAxisModelCommonMethods
+  });
+  function createList(seriesModel) {
+    return createSeriesData_default(null, seriesModel);
+  }
+  function createScale(dataExtent, option) {
+    var axisModel = option;
+    if (!(option instanceof Model_default)) {
+      axisModel = new Model_default(option);
+    }
+    var scale4 = createScaleByModel(axisModel);
+    scale4.setExtent(dataExtent[0], dataExtent[1]);
+    niceScaleExtent(scale4, axisModel);
+    return scale4;
+  }
+  function mixinAxisModelCommonMethods(Model2) {
+    mixin(Model2, AxisModelCommonMixin);
+  }
+  function createTextStyle2(textStyleModel, opts) {
+    opts = opts || {};
+    return createTextStyle(textStyleModel, null, null, opts.state !== "normal");
+  }
+  var dataStack2;
+  var init_helper5 = __esm({
+    "node_modules/echarts/lib/export/api/helper.js"() {
+      init_util();
+      init_createSeriesData();
+      init_axisHelper();
+      init_axisModelCommonMixin();
+      init_Model();
+      init_layout();
+      init_dataStackHelper();
+      init_innerStore();
+      init_labelStyle();
+      init_createDimensions();
+      init_symbol2();
+      init_states();
+      dataStack2 = {
+        isDimensionStacked,
+        enableDataStack,
+        getStackedDimension
+      };
+    }
+  });
+
   // node_modules/zrender/lib/contain/polygon.js
   function isAroundEqual2(a, b) {
     return Math.abs(a - b) < EPSILON6;
@@ -30433,7 +30794,7 @@
           var mat = identity(TMP_TRANSFORM);
           var target = el;
           while (target && !target.isGeoSVGGraphicRoot) {
-            mul(mat, target.getLocalTransform(), mat);
+            mul2(mat, target.getLocalTransform(), mat);
             target = target.parent;
           }
           invert(mat, mat);
@@ -30539,6 +30900,137 @@
     "node_modules/echarts/lib/coord/geo/parseGeoJson.js"() {
       init_util();
       init_Region();
+    }
+  });
+
+  // node_modules/echarts/lib/export/api/number.js
+  var number_exports2 = {};
+  __export(number_exports2, {
+    MAX_SAFE_INTEGER: () => MAX_SAFE_INTEGER,
+    asc: () => asc,
+    getPercentWithPrecision: () => getPercentWithPrecision,
+    getPixelPrecision: () => getPixelPrecision,
+    getPrecision: () => getPrecision,
+    getPrecisionSafe: () => getPrecisionSafe,
+    isNumeric: () => isNumeric,
+    isRadianAroundZero: () => isRadianAroundZero,
+    linearMap: () => linearMap,
+    nice: () => nice,
+    numericToNumber: () => numericToNumber,
+    parseDate: () => parseDate,
+    parsePercent: () => parsePercent2,
+    quantile: () => quantile,
+    quantity: () => quantity,
+    quantityExponent: () => quantityExponent,
+    reformIntervals: () => reformIntervals,
+    remRadian: () => remRadian,
+    round: () => round
+  });
+  var init_number2 = __esm({
+    "node_modules/echarts/lib/export/api/number.js"() {
+      init_number();
+    }
+  });
+
+  // node_modules/echarts/lib/export/api/time.js
+  var time_exports = {};
+  __export(time_exports, {
+    format: () => format,
+    parse: () => parseDate,
+    roundTime: () => roundTime
+  });
+  var init_time2 = __esm({
+    "node_modules/echarts/lib/export/api/time.js"() {
+      init_number();
+      init_time();
+    }
+  });
+
+  // node_modules/echarts/lib/export/api/graphic.js
+  var graphic_exports2 = {};
+  __export(graphic_exports2, {
+    Arc: () => Arc_default,
+    BezierCurve: () => BezierCurve_default,
+    BoundingRect: () => BoundingRect_default,
+    Circle: () => Circle_default,
+    CompoundPath: () => CompoundPath_default,
+    Ellipse: () => Ellipse_default,
+    Group: () => Group_default,
+    Image: () => Image_default,
+    IncrementalDisplayable: () => IncrementalDisplayable_default,
+    Line: () => Line_default,
+    LinearGradient: () => LinearGradient_default,
+    Polygon: () => Polygon_default,
+    Polyline: () => Polyline_default,
+    RadialGradient: () => RadialGradient_default,
+    Rect: () => Rect_default,
+    Ring: () => Ring_default,
+    Sector: () => Sector_default,
+    Text: () => Text_default,
+    clipPointsByRect: () => clipPointsByRect,
+    clipRectByRect: () => clipRectByRect,
+    createIcon: () => createIcon,
+    extendPath: () => extendPath,
+    extendShape: () => extendShape,
+    getShapeClass: () => getShapeClass,
+    getTransform: () => getTransform,
+    initProps: () => initProps,
+    makeImage: () => makeImage,
+    makePath: () => makePath,
+    mergePath: () => mergePath2,
+    registerShape: () => registerShape,
+    resizePath: () => resizePath,
+    updateProps: () => updateProps
+  });
+  var init_graphic3 = __esm({
+    "node_modules/echarts/lib/export/api/graphic.js"() {
+      init_graphic();
+    }
+  });
+
+  // node_modules/echarts/lib/export/api/format.js
+  var format_exports2 = {};
+  __export(format_exports2, {
+    addCommas: () => addCommas,
+    capitalFirst: () => capitalFirst,
+    encodeHTML: () => encodeHTML,
+    formatTime: () => formatTime,
+    formatTpl: () => formatTpl,
+    getTextRect: () => getTextRect,
+    getTooltipMarker: () => getTooltipMarker,
+    normalizeCssArray: () => normalizeCssArray2,
+    toCamelCase: () => toCamelCase,
+    truncateText: () => truncateText
+  });
+  var init_format2 = __esm({
+    "node_modules/echarts/lib/export/api/format.js"() {
+      init_format();
+    }
+  });
+
+  // node_modules/echarts/lib/export/api/util.js
+  var util_exports2 = {};
+  __export(util_exports2, {
+    bind: () => bind,
+    clone: () => clone,
+    curry: () => curry,
+    defaults: () => defaults,
+    each: () => each,
+    extend: () => extend,
+    filter: () => filter,
+    indexOf: () => indexOf,
+    inherits: () => inherits,
+    isArray: () => isArray,
+    isFunction: () => isFunction,
+    isObject: () => isObject,
+    isString: () => isString,
+    map: () => map,
+    merge: () => merge,
+    reduce: () => reduce
+  });
+  var init_util3 = __esm({
+    "node_modules/echarts/lib/export/api/util.js"() {
+      init_util();
     }
   });
 
@@ -31058,8 +31550,53 @@
   });
 
   // node_modules/echarts/lib/export/api.js
+  function extendComponentModel(proto) {
+    var Model2 = Component_default.extend(proto);
+    Component_default.registerClass(Model2);
+    return Model2;
+  }
+  function extendComponentView(proto) {
+    var View2 = Component_default2.extend(proto);
+    Component_default2.registerClass(View2);
+    return View2;
+  }
+  function extendSeriesModel(proto) {
+    var Model2 = Series_default.extend(proto);
+    Series_default.registerClass(Model2);
+    return Model2;
+  }
+  function extendChartView(proto) {
+    var View2 = Chart_default.extend(proto);
+    Chart_default.registerClass(View2);
+    return View2;
+  }
   var init_api = __esm({
     "node_modules/echarts/lib/export/api.js"() {
+      init_Component();
+      init_Component2();
+      init_Series();
+      init_Chart();
+      init_SeriesData();
+      init_zrender();
+      init_matrix();
+      init_vector();
+      init_util();
+      init_color();
+      init_throttle();
+      init_helper5();
+      init_extension();
+      init_platform();
+      init_parseGeoJson();
+      init_parseGeoJson();
+      init_number2();
+      init_time2();
+      init_graphic3();
+      init_format2();
+      init_util3();
+      init_env();
+      init_Model();
+      init_Axis();
+      init_graphic2();
     }
   });
 
@@ -32901,16 +33438,16 @@
   }
   function setTransform(attrs, m2, compress) {
     if (m2 && !(noTranslate(m2) && noRotateScale(m2))) {
-      var mul2 = compress ? 10 : 1e4;
-      attrs.transform = noRotateScale(m2) ? "translate(" + round5(m2[4] * mul2) / mul2 + " " + round5(m2[5] * mul2) / mul2 + ")" : getMatrixStr(m2);
+      var mul3 = compress ? 10 : 1e4;
+      attrs.transform = noRotateScale(m2) ? "translate(" + round5(m2[4] * mul3) / mul3 + " " + round5(m2[5] * mul3) / mul3 + ")" : getMatrixStr(m2);
     }
   }
-  function convertPolyShape(shape, attrs, mul2) {
+  function convertPolyShape(shape, attrs, mul3) {
     var points4 = shape.points;
     var strArr = [];
     for (var i = 0; i < points4.length; i++) {
-      strArr.push(round5(points4[i][0] * mul2) / mul2);
-      strArr.push(round5(points4[i][1] * mul2) / mul2);
+      strArr.push(round5(points4[i][0] * mul3) / mul3);
+      strArr.push(round5(points4[i][1] * mul3) / mul3);
     }
     attrs.points = strArr.join(" ");
   }
@@ -32921,12 +33458,12 @@
     var normalizedDesc = map(desc, function(item) {
       return typeof item === "string" ? [item, item] : item;
     });
-    return function(shape, attrs, mul2) {
+    return function(shape, attrs, mul3) {
       for (var i = 0; i < normalizedDesc.length; i++) {
         var item = normalizedDesc[i];
         var val = shape[item[0]];
         if (val != null) {
-          attrs[item[1]] = round5(val * mul2) / mul2;
+          attrs[item[1]] = round5(val * mul3) / mul3;
         }
       }
     };
@@ -32951,8 +33488,8 @@
     var precision = scope.compress && getPathPrecision(el) || 4;
     if (builtinShpDef && !scope.willUpdate && !(builtinShpDef[1] && !builtinShpDef[1](shape)) && !(needsAnimate && hasShapeAnimation(el)) && !(strokePercent < 1)) {
       svgElType = el.type;
-      var mul2 = Math.pow(10, precision);
-      builtinShpDef[0](shape, attrs, mul2);
+      var mul3 = Math.pow(10, precision);
+      builtinShpDef[0](shape, attrs, mul3);
     } else {
       var needBuildPath = !el.path || el.shapeChanged();
       if (!el.path) {
@@ -33289,7 +33826,7 @@
     attrs["clip-path"] = getIdURL(clipPathId);
   }
   var round5, builtinShapesDef;
-  var init_graphic3 = __esm({
+  var init_graphic4 = __esm({
     "node_modules/zrender/lib/svg/graphic.js"() {
       init_helper();
       init_Path();
@@ -33616,7 +34153,7 @@
   var svgId, SVGPainter, Painter_default;
   var init_Painter = __esm({
     "node_modules/zrender/lib/svg/Painter.js"() {
-      init_graphic3();
+      init_graphic4();
       init_core2();
       init_helper();
       init_util();
@@ -35416,7 +35953,7 @@
     stackedData[1 - baseDataOffset] = value;
     return coordSys.dataToPoint(stackedData);
   }
-  var init_helper5 = __esm({
+  var init_helper6 = __esm({
     "node_modules/echarts/lib/chart/line/helper.js"() {
       init_dataStackHelper();
       init_util();
@@ -35533,7 +36070,7 @@
   }
   var init_lineAnimationDiff = __esm({
     "node_modules/echarts/lib/chart/line/lineAnimationDiff.js"() {
-      init_helper5();
+      init_helper6();
       init_vendor();
     }
   });
@@ -36321,7 +36858,7 @@
       init_model();
       init_poly2();
       init_Chart();
-      init_helper5();
+      init_helper6();
       init_createClipPathFromCoordSys();
       init_CoordinateSystem2();
       init_states();
@@ -40547,7 +41084,7 @@
       if (useStOccupiedRect) {
         transGroup.transform ? invert(_stTransTmp, transGroup.transform) : identity(_stTransTmp);
         if (layoutInfo.transform) {
-          mul(_stTransTmp, _stTransTmp, layoutInfo.transform);
+          mul2(_stTransTmp, _stTransTmp, layoutInfo.transform);
         }
         BoundingRect_default.copy(_stLabelRectTmp, layoutInfo.localRect);
         _stLabelRectTmp.applyTransform(_stTransTmp);
@@ -44447,11 +44984,11 @@
             break;
           case "skewX":
             var sx = Math.tan(parseFloat(valueArr[0]) * DEGREE_TO_ANGLE);
-            mul(mt, [1, 0, sx, 1, 0, 0], mt);
+            mul2(mt, [1, 0, sx, 1, 0, 0], mt);
             break;
           case "skewY":
             var sy = Math.tan(parseFloat(valueArr[0]) * DEGREE_TO_ANGLE);
-            mul(mt, [1, sy, 0, 1, 0, 0], mt);
+            mul2(mt, [1, sy, 0, 1, 0, 0], mt);
             break;
           case "matrix":
             mt[0] = parseFloat(valueArr[0]);
@@ -50987,18 +51524,18 @@
       };
       createCurveness = function(seriesModel, appendLength) {
         var autoCurvenessParmas = getAutoCurvenessParams(seriesModel);
-        var length = 20;
+        var length2 = 20;
         var curvenessList = [];
         if (isNumber(autoCurvenessParmas)) {
-          length = autoCurvenessParmas;
+          length2 = autoCurvenessParmas;
         } else if (isArray(autoCurvenessParmas)) {
           seriesModel.__curvenessList = autoCurvenessParmas;
           return;
         }
-        if (appendLength > length) {
-          length = appendLength;
+        if (appendLength > length2) {
+          length2 = appendLength;
         }
-        var len2 = length % 2 ? length + 2 : length + 3;
+        var len2 = length2 % 2 ? length2 + 2 : length2 + 3;
         curvenessList = [];
         for (var i = 0; i < len2; i++) {
           curvenessList.push((i % 2 ? i + 1 : i) / 10 * (i % 2 ? -1 : 1));
@@ -70384,7 +70921,7 @@
     return coordSysInfoWrap;
   }
   var DATA_ZOOM_AXIS_DIMENSIONS, SERIES_COORDS;
-  var init_helper6 = __esm({
+  var init_helper7 = __esm({
     "node_modules/echarts/lib/component/dataZoom/helper.js"() {
       init_util();
       DATA_ZOOM_AXIS_DIMENSIONS = ["x", "y", "radius", "angle", "single"];
@@ -70406,7 +70943,7 @@
       init_tslib_es6();
       init_util();
       init_Component();
-      init_helper6();
+      init_helper7();
       init_model();
       DataZoomAxisInfo = /** @class */
       function() {
@@ -70778,7 +71315,7 @@
       init_sliderMove();
       init_axisHelper();
       init_scaleRawExtentInfo();
-      init_helper6();
+      init_helper7();
       init_model();
       each9 = each;
       asc2 = asc;
@@ -70977,7 +71514,7 @@
   var init_dataZoomProcessor = __esm({
     "node_modules/echarts/lib/component/dataZoom/dataZoomProcessor.js"() {
       init_util();
-      init_helper6();
+      init_helper7();
       init_AxisProxy();
       dataZoomProcessor = {
         // `dataZoomProcessor` will only be performed in needed series. Consider if
@@ -71057,7 +71594,7 @@
   }
   var init_dataZoomAction = __esm({
     "node_modules/echarts/lib/component/dataZoom/dataZoomAction.js"() {
-      init_helper6();
+      init_helper7();
       init_util();
     }
   });
@@ -72827,7 +73364,7 @@
     return stl ? style ? stl[style] : stl : null;
   }
   var TRANSFORM_VENDOR, TRANSITION_VENDOR;
-  var init_helper7 = __esm({
+  var init_helper8 = __esm({
     "node_modules/echarts/lib/component/tooltip/helper.js"() {
       init_format();
       init_env();
@@ -72967,7 +73504,7 @@
       init_dom();
       init_env();
       init_format();
-      init_helper7();
+      init_helper8();
       init_tooltipMarkup();
       CSS_TRANSITION_VENDOR = toCSSVendorPrefix(TRANSITION_VENDOR, "transition");
       CSS_TRANSFORM_VENDOR = toCSSVendorPrefix(TRANSFORM_VENDOR, "transform");
@@ -73457,7 +73994,7 @@
       init_Component2();
       init_time();
       init_innerStore();
-      init_helper7();
+      init_helper8();
       init_dataFormat();
       init_tooltipMarkup();
       init_event2();
@@ -76625,7 +77162,7 @@
     }
     data.setItemLayout(idx, point);
   }
-  function createList(coordSys, seriesModel, mlModel) {
+  function createList2(coordSys, seriesModel, mlModel) {
     var coordDimsInfos;
     if (coordSys) {
       coordDimsInfos = map(coordSys && coordSys.dimensions, function(coordDim) {
@@ -76769,7 +77306,7 @@
           var lineDrawMap = this.markerGroupMap;
           var lineDraw = lineDrawMap.get(seriesId) || lineDrawMap.set(seriesId, new LineDraw_default());
           this.group.add(lineDraw.group);
-          var mlData = createList(coordSys, seriesModel, mlModel);
+          var mlData = createList2(coordSys, seriesModel, mlModel);
           var fromData = mlData.from;
           var toData = mlData.to;
           var lineData = mlData.line;
@@ -77004,7 +77541,7 @@
     }
     return point;
   }
-  function createList2(coordSys, seriesModel, maModel) {
+  function createList3(coordSys, seriesModel, maModel) {
     var areaData;
     var dataDims;
     var dims = ["x0", "y0", "x1", "y1"];
@@ -77124,7 +77661,7 @@
           });
           this.group.add(polygonGroup.group);
           this.markKeep(polygonGroup);
-          var areaData = createList2(coordSys, seriesModel, maModel);
+          var areaData = createList3(coordSys, seriesModel, maModel);
           maModel.setData(areaData);
           areaData.each(function(idx) {
             var points4 = map(dimPermutations, function(dim) {
@@ -78680,7 +79217,7 @@
       init_throttle();
       init_model();
       init_util();
-      init_helper6();
+      init_helper7();
       inner23 = makeInner();
     }
   });
@@ -78972,7 +79509,7 @@
       init_number();
       init_layout();
       init_sliderMove();
-      init_helper6();
+      init_helper7();
       init_states();
       init_symbol2();
       init_log();
@@ -80344,7 +80881,7 @@
     return batch;
   }
   var paramsSet;
-  var init_helper8 = __esm({
+  var init_helper9 = __esm({
     "node_modules/echarts/lib/component/visualMap/helper.js"() {
       init_util();
       init_layout();
@@ -80393,7 +80930,7 @@
       init_graphic();
       init_number();
       init_sliderMove();
-      init_helper8();
+      init_helper9();
       init_model();
       init_text();
       init_states();
@@ -81467,7 +82004,7 @@
       init_graphic();
       init_symbol2();
       init_layout();
-      init_helper8();
+      init_helper9();
       init_labelStyle();
       PiecewiseVisualMapView = /** @class */
       function(_super) {
@@ -81934,7 +82471,7 @@
             return;
           }
           var invTargetTrans = invert([], bridgeRendered.targetTrans);
-          var transTargetToThis = mul([], this._coordSys.transform, invTargetTrans);
+          var transTargetToThis = mul2([], this._coordSys.transform, invTargetTrans);
           this._transThisToTarget = invert([], transTargetToThis);
           var viewportRect = bridgeRendered.viewportRect;
           if (!viewportRect) {
@@ -85309,7 +85846,7 @@
     var axisStTrans = create2();
     rotate(axisStTrans, axisStTrans, -axisRotation);
     var labelPairStTrans = map(layoutPair, function(layout4) {
-      return layout4.transform ? mul(create2(), axisStTrans, layout4.transform) : axisStTrans;
+      return layout4.transform ? mul2(create2(), axisStTrans, layout4.transform) : axisStTrans;
     });
     function isParallelToAxis(whIdx) {
       var localRect = layoutPair[0].localRect;
@@ -85497,6 +86034,67 @@
   });
 
   // node_modules/echarts/index.js
+  var echarts_exports2 = {};
+  __export(echarts_exports2, {
+    Axis: () => Axis_default,
+    ChartView: () => Chart_default,
+    ComponentModel: () => Component_default,
+    ComponentView: () => Component_default2,
+    List: () => SeriesData_default,
+    Model: () => Model_default,
+    PRIORITY: () => PRIORITY,
+    SeriesModel: () => Series_default,
+    color: () => color_exports,
+    connect: () => connect,
+    dataTool: () => dataTool,
+    dependencies: () => dependencies,
+    disConnect: () => disConnect,
+    disconnect: () => disconnect,
+    dispose: () => dispose2,
+    env: () => env_default,
+    extendChartView: () => extendChartView,
+    extendComponentModel: () => extendComponentModel,
+    extendComponentView: () => extendComponentView,
+    extendSeriesModel: () => extendSeriesModel,
+    format: () => format_exports2,
+    getCoordinateSystemDimensions: () => getCoordinateSystemDimensions,
+    getInstanceByDom: () => getInstanceByDom,
+    getInstanceById: () => getInstanceById,
+    getMap: () => getMap,
+    graphic: () => graphic_exports2,
+    helper: () => helper_exports2,
+    init: () => init2,
+    innerDrawElementOnCanvas: () => brushSingle,
+    matrix: () => matrix_exports,
+    number: () => number_exports2,
+    parseGeoJSON: () => parseGeoJSON,
+    parseGeoJson: () => parseGeoJSON,
+    registerAction: () => registerAction,
+    registerCoordinateSystem: () => registerCoordinateSystem,
+    registerCustomSeries: () => registerCustomSeries2,
+    registerLayout: () => registerLayout,
+    registerLoading: () => registerLoading,
+    registerLocale: () => registerLocale,
+    registerMap: () => registerMap,
+    registerPostInit: () => registerPostInit,
+    registerPostUpdate: () => registerPostUpdate,
+    registerPreprocessor: () => registerPreprocessor,
+    registerProcessor: () => registerProcessor,
+    registerTheme: () => registerTheme,
+    registerTransform: () => registerTransform,
+    registerUpdateLifecycle: () => registerUpdateLifecycle,
+    registerVisual: () => registerVisual,
+    setCanvasCreator: () => setCanvasCreator,
+    setPlatformAPI: () => setPlatformAPI,
+    throttle: () => throttle,
+    time: () => time_exports,
+    use: () => use,
+    util: () => util_exports2,
+    vector: () => vector_exports,
+    version: () => version2,
+    zrUtil: () => util_exports,
+    zrender: () => zrender_exports
+  });
   var init_echarts2 = __esm({
     "node_modules/echarts/index.js"() {
       init_extension();
@@ -85548,6 +86146,7 @@
   var require_main = __commonJS({
     "src/main.js"() {
       init_echarts2();
+      window.echarts = echarts_exports2;
       console.log("JavaScript do FinBoard carregado com sucesso! \u{1F680}");
       window.renderEquityChart = function() {
         const chartDom = document.getElementById("equity-chart");
