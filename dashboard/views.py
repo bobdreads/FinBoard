@@ -523,6 +523,65 @@ def daily_summary(request):
             'counts': counts.tolist(),  # Converte o array do numpy para uma lista python
         }
 
+        # --- MOTOR DE INSIGHTS AUTOMÁTICOS V1 ---
+    insights = []
+    if period_ops.count() > 10:  # Só gera insights se tivermos um volume mínimo de dados
+
+        # 1. Calcula a performance geral (média P/L por trade) no período
+        if period_results_brl:
+            overall_avg_pl = sum(period_results_brl) / len(period_results_brl)
+        else:
+            overall_avg_pl = 0
+
+        # 2. Agrupa os resultados por estratégia
+        strategy_performance_details = defaultdict(list)
+        for op in period_ops:
+            if op.strategy:
+                result_brl = convert_to_brl(
+                    op.net_financial_result, op.account.currency, op.end_date
+                )
+                if result_brl is not None:
+                    # Armazena o resultado e o dia da semana (0=Seg, 1=Ter, ...)
+                    strategy_performance_details[op.strategy.name].append({
+                        'pl': result_brl,
+                        'weekday': op.start_date.weekday()
+                    })
+
+        # 3. Analisa cada estratégia para encontrar padrões nos dias da semana
+        weekdays_map = ["Segunda-feira", "Terça-feira", "Quarta-feira",
+                        "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"]
+
+        for strategy, trades in strategy_performance_details.items():
+            if len(trades) < 5:
+                continue  # Pula estratégias com poucos dados
+
+            # Média P/L geral para ESTA estratégia
+            strategy_avg_pl = sum(t['pl'] for t in trades) / len(trades)
+
+            # Agrupa por dia da semana
+            weekday_groups = defaultdict(list)
+            for trade in trades:
+                weekday_groups[trade['weekday']].append(trade['pl'])
+
+            # Compara a média de cada dia com a média da estratégia
+            for day_index, day_results in weekday_groups.items():
+                if len(day_results) < 3:
+                    continue  # Requer um mínimo de trades no dia
+
+                day_avg_pl = sum(day_results) / len(day_results)
+
+                # Insight: A performance do dia é significativamente diferente da média?
+                if strategy_avg_pl != 0:
+                    deviation = ((day_avg_pl / strategy_avg_pl) - 1) * 100
+
+                    # Limite de 20% para considerar um insight relevante
+                    if abs(deviation) > 10:
+                        day_name = weekdays_map[day_index]
+                        comp_text = "maior" if deviation > 0 else "menor"
+                        insights.append(
+                            f"Sua performance com a estratégia <strong>{strategy}</strong> na <strong>{day_name}</strong> costuma ser <strong>{deviation:.0f}% {comp_text}</strong> que a média."
+                        )
+
     context = {
         'start_date': start_date,
         'end_date': end_date,
@@ -545,6 +604,7 @@ def daily_summary(request):
         'trade_count_change': trade_count_change,
         'win_rate_change': win_rate_change,
         'histogram_data': json.dumps(histogram_data),
+        'insights': insights,
     }
 
     return render(request, 'dashboard/daily_summary.html', context)
