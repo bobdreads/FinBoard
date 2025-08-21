@@ -23,7 +23,8 @@ RUN python manage.py collectstatic --noinput
 RUN python manage.py migrate --noinput
 
 # Criar o superusuário inicial se ele não existir
-RUN python manage.py create_initial_superuser
+# RUN python manage.py create_initial_superuser
+RUN python manage.py set_admin_password
 
 # Expor a porta que o Gunicorn vai usar
 EXPOSE 8000
@@ -31,4 +32,4 @@ EXPOSE 8000
 # Comando para iniciar a aplicação quando o container rodar
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi:application"]
 
-# Cache buster v1
+# Cache buster v2
