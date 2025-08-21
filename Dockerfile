@@ -22,6 +22,9 @@ RUN python manage.py collectstatic --noinput
 # Rodar as migrações do banco de dados automaticamente
 RUN python manage.py migrate --noinput
 
+# Criar o superusuário inicial se ele não existir
+RUN python manage.py create_initial_superuser
+
 # Expor a porta que o Gunicorn vai usar
 EXPOSE 8000
 
