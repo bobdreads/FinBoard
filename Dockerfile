@@ -8,9 +8,6 @@ ENV PYTHONUNBUFFERED 1
 # Definir o diretório de trabalho dentro do container
 WORKDIR /app
 
-# Instalar dependências do sistema, se necessário (já temos libpq-dev no passo anterior, mas é bom ter aqui)
-# RUN apt-get update && apt-get install -y libpq-dev gcc
-
 # Copiar o arquivo de dependências e instalar
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -21,9 +18,12 @@ COPY . .
 # Coletar os arquivos estáticos do Django
 RUN python manage.py collectstatic --noinput
 
+# <<< ADIÇÃO IMPORTANTE >>>
+# Rodar as migrações do banco de dados automaticamente
+RUN python manage.py migrate --noinput
+
 # Expor a porta que o Gunicorn vai usar
 EXPOSE 8000
 
 # Comando para iniciar a aplicação quando o container rodar
-# Gunicorn vai servir o arquivo wsgi.py dentro da pasta config
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi:application"]
