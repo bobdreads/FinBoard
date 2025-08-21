@@ -32,4 +32,4 @@ EXPOSE 8000
 # Comando para iniciar a aplicação quando o container rodar
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi:application"]
 
-# Cache buster v2
+# Cache buster v4
