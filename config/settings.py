@@ -1,35 +1,28 @@
+import os
 from pathlib import Path
 from decouple import config
-import os
-
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# --- CONFIGURAÇÕES DE PRODUÇÃO ---
+# A chave secreta, o modo debug e os hosts permitidos agora são lidos do arquivo .env
 SECRET_KEY = config('SECRET_KEY')
-
 DEBUG = config('DEBUG', default=False, cast=bool)
-
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost',
-                       cast=lambda v: [s.strip() for s in v.split(',')])
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=lambda v: [
+                       s.strip() for s in v.split(',')])
 
 
 # Application definition
 
 INSTALLED_APPS = [
-
-    # Apps padrão do Django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
-    'django.contrib.humanize',
-
-    # Apps de terceiros
-
     # Meus Apps
     'core',
     'dashboard',
@@ -37,6 +30,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Adicionado para servir arquivos estáticos
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -55,6 +49,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -66,17 +61,15 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-default_db_url = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
-
+# --- BANCO DE DADOS DE PRODUÇÃO (POSTGRESQL) ---
+# A configuração do banco de dados agora é lida da variável DATABASE_URL no arquivo .env
 DATABASES = {
-    'default': config('DATABASE_URL', default=default_db_url, cast=db_url)
+    'default': dj_database_url.config(default=config('DATABASE_URL'))
 }
 
 
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -95,9 +88,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
+# https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'pt-BR'
+LANGUAGE_CODE = 'pt-br'
 
 TIME_ZONE = 'America/Sao_Paulo'
 
@@ -106,18 +99,18 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# --- CONFIGURAÇÃO DE ARQUIVOS ESTÁTICOS PARA PRODUÇÃO ---
 STATIC_URL = 'static/'
 
+# Diretório onde o Nginx vai procurar pelos arquivos estáticos coletados
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Configuração para o WhiteNoise encontrar os arquivos
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-# --- CONFIGURAÇÃO DE AUTENTICAÇÃO E REDIRECIONAMENTO ---
+# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
