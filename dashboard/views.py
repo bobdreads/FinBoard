@@ -8,6 +8,7 @@ from django.db import transaction, IntegrityError
 from django.db.models import Sum, Count, Avg, Max, Min, F, ExpressionWrapper, fields
 from django.db.models.functions import TruncHour
 from django.utils import timezone
+from django.urls import reverse_lazy
 
 from decimal import Decimal
 from datetime import datetime, timedelta
@@ -16,6 +17,17 @@ from collections import defaultdict
 from .models import Account, Transaction, Operation, Strategy, Movement
 from .forms import AccountForm, TransactionForm, OperationForm, StrategyForm, MovementForm
 from .currency_converter import convert_to_brl
+
+
+class AccountCreateView(LoginRequiredMixin, CreateView):
+    model = Account
+    form_class = AccountForm
+    template_name = 'dashboard/account_form.html'
+    success_url = reverse_lazy('dashboard:account_list')  # Adicione esta linha
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
 
 
 @login_required
