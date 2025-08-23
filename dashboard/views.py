@@ -9,6 +9,7 @@ from django.db.models import Sum, Count, Avg, Max, Min, F, ExpressionWrapper, fi
 from django.db.models.functions import TruncHour
 from django.utils import timezone
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from decimal import Decimal
 from datetime import datetime, timedelta
