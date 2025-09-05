@@ -1,0 +1,47 @@
+:root {
+    --componentBackground: #1e2029;
+    --background: #131316;
+    --textSecondary: #828b9e;
+    --cardBackground: #19191f;
+    --mainColor: #3d4dff;
+    --textMain: #ffffff;
+    --thirdDark: #363947;
+    --textSecondary: #828b9e;
+}
+
+.bg-mainColor, .bg-primary {
+    background-color: var(--mainColor);
+}
+
+.bg-background {
+    background-color: var(--background);
+}
+
+.bg-componentBg {
+    background-color: var(--componentBackground);
+}
+
+.bg-thirdDark {
+    background-color: var(--thirdDark);
+}
+
+.border-componentBg{
+    border-color: var(--componentBackground);
+}
+
+.text-textMain {
+    color: var(--textMain);
+}
+
+.text-textSecondary{
+    color: var(--textSecondary);
+}
+
+.size-6{
+    width:1.5rem;
+    height:1.5rem;
+}
+
+.bg-CardBackground {
+    background-color: var(--cardBackground);
+}

@@ -1,21 +1,60 @@
-# Ambiente Virtual
-.venv/
-env/
-venv/
+# FinBoard/.gitignore
 
-# Arquivos de cache do Python
-__pycache__/
+# -----------------
+# Python / Django (dentro da pasta /api/)
+# -----------------
+
+# Ambiente virtual
+/api/.venv/
+/api/venv/
+/api/env/
+
+# Arquivos de ambiente - NUNCA envie chaves secretas para o Git!
+/api/.env
+
+# Banco de dados local
+/api/db.sqlite3
+
+# Arquivos compilados do Python
+/api/__pycache__/
 *.pyc
 
-# Banco de dados de desenvolvimento
-db.sqlite3
+# Arquivos de mídia enviados por usuários
+/api/media/
 
 # Arquivos de dependências do Node.js
-node_modules/
+/api/node_modules/
 
 # Arquivos de ambiente (ver próximo item)
-.env
+/api/main.bundle.js
 
-main.bundle.js
 
-db.sqlite3
+# -----------------
+# Node.js / Next.js (dentro da pasta /web/)
+# -----------------
+
+# Dependências
+/web/node_modules/
+
+# Arquivos de build do Next.js
+/web/.next/
+/web/out/
+
+# Arquivos de ambiente do frontend
+/web/.env.local
+/web/.env.*.local
+!/web/.env.example
+
+# Logs
+/web/npm-debug.log*
+/web/yarn-debug.log*
+/web/yarn-error.log*
+
+
+# -----------------
+# Arquivos de SO e Editores (Geral)
+# -----------------
+.DS_Store
+.vscode/
+.idea/
+
