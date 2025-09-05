@@ -1,65 +1,76 @@
-'use client'
+// web/src/app/login/page.tsx
 
-import { signIn } from 'next-auth/react'
-import { useState } from 'react'
+"use client";
+
+import { useState } from 'react';
+import { Lock, User } from 'lucide-react'; // Biblioteca de ícones (opcional, mas elegante)
 
 export default function LoginPage() {
-    // 2. Criamos "estados" para guardar o que o utilizador digita
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
-    // 3. Esta função será chamada quando o formulário for submetido
     const handleSubmit = (event: React.FormEvent) => {
-        // Previne o comportamento padrão do formulário, que é recarregar a página
         event.preventDefault();
-
         console.log("Tentativa de login com:", { username, password });
-
-        // TODO: Aqui virá a lógica para chamar a API
         alert(`Login com: ${username}`);
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen">
-            <form
-                onSubmit={handleSubmit}
-                className="p-8 rounded-lg shadow-lg w-full max-w-sm" // Estilo base, fique à vontade para mudar
-            >
-                <h2 className="text-2xl font-bold mb-6">Login</h2>
+        // --- Container Principal ---
+        // Ocupa a tela inteira, fundo escuro e centraliza o conteúdo
+        <div className="grid grid-cols-1 grid-rows-[1fr_9fr_1fr] lg:grid-cols-2 lg:grid-rows-1 bg-background min-h-[100dvh] false">
 
-                <div className="mb-4">
-                    <label htmlFor="username">Utilizador</label>
-                    <input
-                        type="text"
-                        id="username"
-                        value={username}
-                        // Cada vez que o utilizador digita, atualizamos o estado 'username'
-                        onChange={(e) => setUsername(e.target.value)}
-                        className="w-full p-2 mt-1" // Estilo base
-                        required
-                    />
-                </div>
+            {/* --- Card de Login --- */}
+            <div className="flex flex-col justify-center text-textMain px-4 lg:px-32 lg:py-10 w-full false">
 
-                <div className="mb-6">
-                    <label htmlFor="password">Senha</label>
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        // Cada vez que o utilizador digita, atualizamos o estado 'password'
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full p-2 mt-1" // Estilo base
-                        required
-                    />
-                </div>
+                {/* --- Cabeçalho --- */}
+                <h1 className="text-3xl font-bold">
+                    Login
+                </h1>
+                <p className="text-[var(--textSecondary)] text-lg mt-4 font-medium mb-10">Bem-vindo de volta, trader.</p>
 
-                <button
-                    type="submit"
-                    className="w-full py-2 rounded" // Estilo base
-                >
-                    Entrar
-                </button>
-            </form>
+                {/* --- Formulário --- */}
+                <form onSubmit={handleSubmit} className="space-y-6">
+
+                    {/* --- Campo de Utilizador --- */}
+                    <div className="mb-4 relative">
+                        <label htmlFor="username" className="block font-medium text-textSecondary mb-2">Utilizador</label>
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <input
+                            type="text"
+                            id="username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="Usuário"
+                            className="w-full p-3 pl-10 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all"
+                            required
+                        />
+                    </div>
+
+                    {/* --- Campo de Senha --- */}
+                    <div className="mb-4 relative">
+                        <label htmlFor="password" className="sr-only">Senha</label>
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <input
+                            type="password"
+                            id="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Senha"
+                            className="w-full p-3 pl-10 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all"
+                            required
+                        />
+                    </div>
+
+                    {/* --- Botão de Submissão --- */}
+                    <button
+                        type="submit"
+                        className="w-full py-3 font-semibold text-white bg-mainColor rounded-lg hover:bg-blue-500 transition-transform transform hover:scale-105"
+                    >
+                        Entrar
+                    </button>
+                </form>
+            </div>
         </div>
     );
 }
