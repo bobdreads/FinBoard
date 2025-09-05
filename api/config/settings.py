@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'dashboard',
     # Apps de terceiros
     'rest_framework',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -35,6 +36,7 @@ MIDDLEWARE = [
     # Adicionado para servir arquivos estáticos
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -119,3 +121,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = 'core:home'
 LOGIN_URL = 'core:login'
 LOGOUT_REDIRECT_URL = 'core:login'
+
+# Configurações do CORS
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Endereço do nosso frontend Next.js em desenvolvimento
+]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}

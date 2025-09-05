@@ -25,6 +25,7 @@ from .currency_converter import convert_to_brl
 
 # --- NOVOS IMPORTS PARA A API ---
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
 from .serializers import OperationSerializer
 
 #
@@ -636,10 +637,15 @@ def daily_summary(request):
 class OperationListAPIView(generics.ListAPIView):
     """
     View da API para listar todas as operações do usuário logado.
-    Retorna dados em formato JSON.
+    Exige autenticação via Token JWT.
     """
     serializer_class = OperationSerializer
+    # 2. Altere a permissão para exigir autenticação
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Garante que o usuário autenticado só possa ver suas próprias operações
-        return Operation.objects.filter(user=self.request.user).order_by('-start_date')
+        # 3. VOLTAMOS a filtrar pelo usuário da requisição!
+        #    O DRF e o SimpleJWT garantem que `self.request.user`
+        #    será o usuário dono do token.
+        user = self.request.user
+        return Operation.objects.filter(user=user).order_by('-start_date')

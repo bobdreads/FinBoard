@@ -1,0 +1,25 @@
+{
+  "folders": [
+    {
+      "path": "api",
+      "name": "Backend (API)"
+    },
+    {
+      "path": "web",
+      "name": "Frontend (Web)"
+    }
+  ],
+  "settings": {
+    // Backend (Python/Django)
+    "python.defaultInterpreterPath": "${workspaceFolder:Backend (API)}/.venv/Scripts/python.exe",
+    "python.terminal.activateEnvironment": true,
+
+    // Frontend (Next.js/Tailwind)
+    "files.associations": {
+      "*.css": "tailwindcss"
+    },
+
+    // Geral
+    "editor.formatOnSave": true
+  }
+}
