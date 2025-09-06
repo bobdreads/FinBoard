@@ -5,32 +5,62 @@ import AuthLayout from "@/components/auth/AuthLayout";
 export default function RegisterPage() {
     return (
         <AuthLayout>
-            <h1 className="text-3xl font-bold mb-6 text-center">Criar Conta</h1>
-            <form className="space-y-4">
+            <div className="mb-10">
+                <h1 className="text-3xl font-semibold text-textMain">Criar Conta</h1>
+            </div>
+            <form className="space-y-6">
                 <div>
-                    <label className="block text-sm mb-1">Nome</label>
-                    <input type="text" className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent" />
+                    <label htmlFor="nome" className="block text-sm mb-2 text-textSecondary">
+                        Nome
+                    </label>
+                    <input
+                        id="nome"
+                        type="nome"
+                        className="w-full rounded-md border border-componentBg bg-componentBg px-4 py-2 text-textMain focus:outline-none focus:ring-2 focus:ring-mainColor"
+                        placeholder="Digite seu Nome"
+                    />
                 </div>
                 <div>
-                    <label className="block text-sm mb-1">Email</label>
-                    <input type="email" className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent" />
+                    <label htmlFor="email" className="block text-sm mb-2 text-textSecondary">
+                        Email
+                    </label>
+                    <input
+                        id="email"
+                        type="email"
+                        className="w-full rounded-md border border-componentBg bg-componentBg px-4 py-2 text-textMain focus:outline-none focus:ring-2 focus:ring-mainColor"
+                        placeholder="Digite seu email"
+                    />
                 </div>
                 <div>
-                    <label className="block text-sm mb-1">Senha</label>
-                    <input type="password" className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent" />
+                    <label htmlFor="password" className="block text-sm mb-2 text-textSecondary">
+                        Senha
+                    </label>
+                    <input
+                        id="password"
+                        type="password"
+                        className="w-full rounded-md border border-componentBg bg-componentBg px-4 py-2 text-textMain focus:outline-none focus:ring-2 focus:ring-mainColor"
+                        placeholder="Digite sua senha"
+                    />
                 </div>
                 <button
                     type="submit"
-                    className="w-full py-2 rounded-lg bg-gradient-to-r from-purple-500 to-orange-400 text-white font-semibold"
+                    className="w-full py-2 mt-6 rounded-md font-semibold text-white bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 hover:opacity-90"
                 >
                     Criar Conta
                 </button>
+
+                <div className="mt-4 text-center">
+                    <a href="/login" className="text-sm text-textSecondary hover:underline">
+                        Já tenho uma conta
+                    </a>
+                </div>
             </form>
-            <div className="mt-4 text-center">
-                <a href="/auth/login" className="text-sm text-blue-400">
-                    Já tenho uma conta
-                </a>
-            </div>
+
+            {/* Rodapé */}
+            <footer className="text-xs text-textSecondary mt-10 text-center">
+                2025 | Desenvolvido por <a href="#" className="underline">Maurício Filho</a>
+            </footer>
+
         </AuthLayout>
     );
 }

@@ -14,7 +14,7 @@ export default function LoginPage() {
     return (
         <AuthLayout>
             <div className="mb-10">
-                <h1 className="text-3xl font-bold text-textMain">Login</h1>
+                <h1 className="text-3xl font-semibold text-textMain">Login</h1>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -48,7 +48,7 @@ export default function LoginPage() {
 
                 {/* Esqueci a senha */}
                 <div className="flex justify-end">
-                    <a href="#" className="text-sm  text-white hover:underline">
+                    <a href="/forgot-password" className="text-sm  text-white hover:underline">
                         Esqueci minha senha
                     </a>
                 </div>
@@ -63,7 +63,7 @@ export default function LoginPage() {
 
                 {/* Criar conta */}
                 <div className="text-center mt-4">
-                    <a href="#" className="text-sm text-textSecondary hover:underline">
+                    <a href="/register" className="text-sm text-textSecondary hover:underline">
                         Ainda não tenho uma conta
                     </a>
                 </div>
