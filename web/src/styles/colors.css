@@ -6,6 +6,14 @@
     --mainColor: #3d4dff;
     --textMain: #ffffff;
     --thirdDark: #363947;
+
+    --main-color: #4f46e5; /* Exemplo de cor principal */
+    --secondary-color: #9333ea; /* Exemplo de cor secundária */
+    --background-color: #f3f4f6; /* Exemplo de cor de fundo */
+    --text-color: #111827; /* Exemplo de cor de texto */
+    --input-bg-color: #ffffff; /* Cor de fundo dos inputs */
+    --input-border-color: #d1d5db; /* Cor da borda dos inputs */
+    --input-focus-ring-color: #6366f1;
 }
 
 .bg-mainColor, .bg-primary {

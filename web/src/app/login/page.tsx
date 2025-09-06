@@ -1,76 +1,91 @@
-// web/src/app/login/page.tsx
+'use client'
 
-"use client";
-
-import { useState } from 'react';
-import { Lock, User } from 'lucide-react'; // Biblioteca de ícones (opcional, mas elegante)
+import { useState } from 'react'
+import { signIn } from 'next-auth/react'
+import AuthLayout from '@/components/auth/AuthLayout';
 
 export default function LoginPage() {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-    const handleSubmit = (event: React.FormEvent) => {
-        event.preventDefault();
-        console.log("Tentativa de login com:", { username, password });
-        alert(`Login com: ${username}`);
-    };
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setIsLoading(true)
+        setErrorMessage(null)
+
+        const res = await signIn('credentials', {
+            redirect: false,
+            email,
+            password,
+        })
+
+        if (res?.error) {
+            setErrorMessage('Credenciais inválidas')
+        } else {
+            window.location.href = '/dashboard'
+        }
+
+        setIsLoading(false)
+    }
 
     return (
-        // --- Container Principal ---
-        // Ocupa a tela inteira, fundo escuro e centraliza o conteúdo
-        <div className="grid grid-cols-1 grid-rows-[1fr_9fr_1fr] lg:grid-cols-2 lg:grid-rows-1 bg-background min-h-[100dvh] false">
-
-            {/* --- Card de Login --- */}
+        <AuthLayout>
             <div className="flex flex-col justify-center text-textMain px-4 lg:px-32 lg:py-10 w-full false">
-
-                {/* --- Cabeçalho --- */}
-                <h1 className="text-3xl font-bold">
-                    Login
-                </h1>
-                <p className="text-[var(--textSecondary)] text-lg mt-4 font-medium mb-10">Bem-vindo de volta, trader.</p>
-
-                {/* --- Formulário --- */}
-                <form onSubmit={handleSubmit} className="space-y-6">
-
-                    {/* --- Campo de Utilizador --- */}
-                    <div className="mb-4 relative">
-                        <label htmlFor="username" className="block font-medium text-textSecondary mb-2">Utilizador</label>
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <h2 className="text-3xl font-semibold text-textMain text-center mb-6">FinBoard</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-textSecondary">
+                            Email
+                        </label>
                         <input
-                            type="text"
-                            id="username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            placeholder="Usuário"
-                            className="w-full p-3 pl-10 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all"
+                            id="email"
+                            type="email"
                             required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="mt-1 w-full px-4 py-2 bg-cardBackground border border-componentBg text-textMain rounded-md focus:outline-none focus:ring-2 focus:ring-mainColor"
+                            placeholder="exemplo@dominio.com"
                         />
                     </div>
-
-                    {/* --- Campo de Senha --- */}
-                    <div className="mb-4 relative">
-                        <label htmlFor="password" className="sr-only">Senha</label>
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <div>
+                        <label htmlFor="password" className="block text-sm font-medium text-textSecondary">
+                            Senha
+                        </label>
                         <input
-                            type="password"
                             id="password"
+                            type="password"
+                            required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Senha"
-                            className="w-full p-3 pl-10 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all"
-                            required
+                            className="mt-1 w-full px-4 py-2 bg-cardBackground border border-componentBg text-textMain rounded-md focus:outline-none focus:ring-2 focus:ring-mainColor"
+                            placeholder="••••••••"
                         />
                     </div>
 
-                    {/* --- Botão de Submissão --- */}
+                    {errorMessage && <p className="text-sm text-mainColor">{errorMessage}</p>}
+
                     <button
                         type="submit"
-                        className="w-full py-3 font-semibold text-white bg-mainColor rounded-lg hover:bg-blue-500 transition-transform transform hover:scale-105"
+                        className="w-full py-2 mt-4 text-white bg-mainColor font-semibold rounded-md hover:bg-thirdDark transition-colors"
+                        disabled={isLoading}
                     >
-                        Entrar
+                        {isLoading ? 'Carregando...' : 'Entrar'}
                     </button>
                 </form>
+                <div className="mt-4 text-center">
+                    <a href="/auth/forgot-password" className="text-mainColor underline text-sm">
+                        Esqueceu a senha?
+                    </a>
+                </div>
             </div>
-        </div>
-    );
+
+            {/* Lado direito - imagem */}
+            <div
+                className="hidden lg:flex w-1/2 bg-cover bg-center"
+                style={{ backgroundImage: "url('/images/login-image.jpg')" }}>
+            </div>
+        </AuthLayout>
+    )
 }
