@@ -1,21 +1,22 @@
-// web/src/components/auth/AuthLayout.tsx
+import { ReactNode } from "react"
 
-import React from 'react';
-
-// O layout aceita 'children', que será o nosso formulário específico (Login, Registo, etc.)
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default function AuthLayout({ children }: { children: ReactNode }) {
     return (
-        // --- Container Principal (A "moldura" que se repete) ---
-        <section className='grid lg:grid-cols-2 bg-background min-h-[100dvh]'>
+        <section className="grid lg:grid-cols-2 bg-background min-h-screen relative">
             {/* Lado esquerdo - formulário */}
-            <div className="flex items-center justify-center">
-                {children}
+            <div className="flex items-center justify-center px-6">
+                <div className="w-full max-w-md">{children}</div>
             </div>
-            {/* Lado direito - imagem */}
-            <div
-                className="hidden lg:flex bg-cover bg-center"
-                style={{ backgroundImage: "url('assets/images/login-bg.jpg')" }}
-            />
+
+            {/* Lado direito - imagem com overlay esfumaçado */}
+            <div className="hidden lg:block relative w-full h-full">
+                <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: "linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0)), url('/assets/images/login-bg.jpg')" }}
+                />
+                {/* Gradiente esfumaçado que "mescla" com o lado esquerdo */}
+                <div className="absolute inset-0 bg-gradient-to-l from-background/95 to-transparent" />
+            </div>
         </section>
-    );
+    )
 }

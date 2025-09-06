@@ -18,7 +18,7 @@ module.exports = {
         thirdDark: "var(--thirdDark)",
       },
       fontFamily: {
-        sans: ['var(--font-gilroy)', 'sans-serif'],
+        gilroy: ['Gilroy', 'sans-serif'],
       }
     },
   },

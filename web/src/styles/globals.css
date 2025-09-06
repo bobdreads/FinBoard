@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./colors.css";
 
 @font-face {
   font-family: "Gilroy";

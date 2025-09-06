@@ -1,19 +1,36 @@
-// web/src/app/register/page.tsx
-
 "use client";
-import AuthLayout from "@/components/auth/AuthLayout"; // Reutilizando!
+
+import AuthLayout from "@/components/auth/AuthLayout";
 
 export default function RegisterPage() {
     return (
         <AuthLayout>
-            {/* TODO: Construir o formulário de registo aqui */}
-            <div className="text-center">
-                <h3 className="font-bold text-xl mb-4">Página de Registo</h3>
-                <p className="text-gray-400">O formulário de registo virá aqui!</p>
-                <button className="mt-4 w-full py-3 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-                    Registrar
+            <h1 className="text-3xl font-bold mb-6 text-center">Criar Conta</h1>
+            <form className="space-y-4">
+                <div>
+                    <label className="block text-sm mb-1">Nome</label>
+                    <input type="text" className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent" />
+                </div>
+                <div>
+                    <label className="block text-sm mb-1">Email</label>
+                    <input type="email" className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent" />
+                </div>
+                <div>
+                    <label className="block text-sm mb-1">Senha</label>
+                    <input type="password" className="w-full rounded-lg border px-3 py-2 text-sm bg-transparent" />
+                </div>
+                <button
+                    type="submit"
+                    className="w-full py-2 rounded-lg bg-gradient-to-r from-purple-500 to-orange-400 text-white font-semibold"
+                >
+                    Criar Conta
                 </button>
+            </form>
+            <div className="mt-4 text-center">
+                <a href="/auth/login" className="text-sm text-blue-400">
+                    Já tenho uma conta
+                </a>
             </div>
         </AuthLayout>
-    )
+    );
 }
