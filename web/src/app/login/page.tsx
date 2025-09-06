@@ -48,8 +48,8 @@ export default function LoginPage() {
 
                 {/* Esqueci a senha */}
                 <div className="flex justify-end">
-                    <a href="/forgot-password" className="text-sm  text-white hover:underline">
-                        Esqueci minha senha
+                    <a href="/forgot-password" className="text-sm  text-blue-400  hover:underline">
+                        Esqueceu a senha?
                     </a>
                 </div>
 
@@ -62,10 +62,8 @@ export default function LoginPage() {
                 </button>
 
                 {/* Criar conta */}
-                <div className="text-center mt-4">
-                    <a href="/register" className="text-sm text-textSecondary hover:underline">
-                        Ainda não tenho uma conta
-                    </a>
+                <div className="text-center text-sm text-textSecondary mt-4">
+                    Ainda não tem uma conta? <a href="/register" className="text-blue-400 hover:underline">Criar conta.</a>
                 </div>
             </form>
 

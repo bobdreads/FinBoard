@@ -49,10 +49,8 @@ export default function RegisterPage() {
                     Criar Conta
                 </button>
 
-                <div className="mt-4 text-center">
-                    <a href="/login" className="text-sm text-textSecondary hover:underline">
-                        Já tenho uma conta
-                    </a>
+                <div className="mt-4 text-center text-sm text-textSecondary">
+                    Já tem uma conta? <a href="/login" className="text-blue-400  hover:underline">Entrar!</a>
                 </div>
             </form>
 
