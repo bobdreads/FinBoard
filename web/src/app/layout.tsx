@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthProvider } from "@/context/AuthContext";
 import "./../styles/globals.css";
 
 
@@ -16,7 +17,11 @@ export default function RootLayout({
   return (
     // Aplicamos 'dark' para o tema escuro do Tailwind funcionar
     <html lang="pt-BR" className="dark">
-      <body>{children}</body>
+      <body>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }

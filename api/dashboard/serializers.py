@@ -1,33 +1,48 @@
+# api/dashboard/serializers.py
+
 from rest_framework import serializers
-from .models import Operation
+from django.contrib.auth.models import User
+from .models import Trade, Portfolio, Strategy
 
 
-class OperationSerializer(serializers.ModelSerializer):
-    """
-    Serializer para o modelo Operation.
-    Converte os dados do modelo para o formato JSON e vice-versa.
-    """
-    strategy_name = serializers.CharField(
-        source='strategy.name', read_only=True)
-    account_name = serializers.CharField(source='account.name', read_only=True)
-    asset_ticker = serializers.CharField(source='asset.ticker', read_only=True)
+class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
 
-    # O método 'get_total_price' no seu modelo não existe, vamos calcular o resultado financeiro
-    # Se você tiver um campo de resultado no modelo, podemos usá-lo. Por agora, vamos usar 'net_financial_result'
-    financial_result = serializers.DecimalField(
-        source='net_financial_result', max_digits=10, decimal_places=2, read_only=True)
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password'],
+            email=validated_data.get('email', '')
+        )
+        return user
 
     class Meta:
-        model = Operation
-        # Incluímos todos os campos do modelo e os campos extras que criamos
+        model = User
+        fields = ('id', 'username', 'email', 'password')
+
+# NOVO SERIALIZER PARA O MODELO TRADE
+
+
+class TradeSerializer(serializers.ModelSerializer):
+    # Usamos source para aceder a campos de modelos relacionados
+    portfolio_name = serializers.CharField(
+        source='portfolio.name', read_only=True)
+    user_username = serializers.CharField(
+        source='user.username', read_only=True)
+
+    class Meta:
+        model = Trade
+        # Lista de campos do novo modelo que queremos expor na API
         fields = [
             'id',
-            'user',
-            'account_name',
-            'strategy_name',
-            'asset_ticker',
-            'status',
-            'start_date',
-            'end_date',
-            'financial_result',
+            'symbol',
+            'side',
+            'fees',
+            'net_result',
+            'is_open',
+            'created_at',
+            'portfolio',  # ID do portfólio
+            'portfolio_name',
+            'user',  # ID do utilizador
+            'user_username',
         ]

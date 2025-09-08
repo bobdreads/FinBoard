@@ -1,93 +1,79 @@
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import User
+# api/dashboard/admin.py
 
+from django.contrib import admin
+# 1. Importamos os NOSSOS NOVOS modelos
 from .models import (
-    Account, Transaction, Asset, Strategy, Tag,
-    Operation, Movement, Attachment, Profile
+    Portfolio,
+    Strategy,
+    Trade,
+    TradeEntry,
+    TradeStop,
+    TradeTarget,
+    TradeManualClose,
+    JournalNote,
+    PortfolioTransaction,
 )
 
-# --- Registrando os Novos Modelos de Gestão de Capital ---
+# 2. Registamos cada novo modelo para que apareça no painel de admin.
+#    Isto permite-nos criar, ver, editar e apagar dados facilmente.
 
 
-class ProfileInline(admin.StackedInline):
-    model = Profile
-    can_delete = False
-    verbose_name_plural = 'Metas do Perfil'
-
-# --- Define uma nova classe UserAdmin ---
-
-
-class UserAdmin(BaseUserAdmin):
-    inlines = (ProfileInline,)
-
-
-# --- Re-registra o User admin ---
-admin.site.unregister(User)
-admin.site.register(User, UserAdmin)
-
-
-@admin.register(Account)
-class AccountAdmin(admin.ModelAdmin):
-    list_display = ('name', 'user', 'currency', 'initial_balance', 'is_active')
-    list_filter = ('currency', 'is_active', 'user')
+@admin.register(Portfolio)
+class PortfolioAdmin(admin.ModelAdmin):
+    list_display = ('name', 'user', 'balance', 'currency', 'created_at')
+    list_filter = ('user', 'currency')
     search_fields = ('name',)
-    # Adicionando a capacidade de editar transações diretamente da conta
-    # inlines = [TransactionInline] # Descomente quando criarmos o Inline
-
-
-@admin.register(Transaction)
-class TransactionAdmin(admin.ModelAdmin):
-    list_display = ('account', 'type', 'amount', 'date')
-    list_filter = ('type', 'account')
-    autocomplete_fields = ['account']  # Facilita a busca por uma conta
-
-
-# --- Configurações Anteriores (sem alterações) ---
-
-class MovementInline(admin.TabularInline):
-    model = Movement
-    extra = 0
-
-
-class AttachmentInline(admin.TabularInline):
-    model = Attachment
-    extra = 0
-
-
-@admin.register(Operation)
-class OperationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'account', 'asset', 'status',
-                    'net_financial_result', 'start_date')
-    list_filter = ('status', 'account', 'asset__market', 'strategy', 'user')
-    search_fields = ('asset__ticker', 'user__username',
-                     'strategy__name', 'account__name')
-    autocomplete_fields = ['account', 'asset', 'strategy', 'user', 'tags']
-    inlines = [MovementInline, AttachmentInline]
-    fieldsets = (
-        ('Info Principal', {'fields': (
-            'user', 'account', 'asset', 'status', 'initial_operation_type', 'strategy')}),
-        ('Plano de Trade', {
-         'fields': ('initial_stop_price', 'initial_target_price')}),
-        ('Datas', {'fields': ('start_date', 'end_date')}),
-        ('Análise e Resultado', {'fields': (
-            'entry_reason', 'general_notes', 'entry_sentiment', 'execution_rating', 'tags')}),
-        ('Resultados Calculados', {
-         'fields': ('net_financial_result', 'points_pips_result')}),
-    )
-
-
-@admin.register(Asset)
-class AssetAdmin(admin.ModelAdmin):
-    search_fields = ('ticker', 'name')
-    list_filter = ('market', 'currency')
 
 
 @admin.register(Strategy)
 class StrategyAdmin(admin.ModelAdmin):
+    list_display = ('name', 'user')
+    list_filter = ('user',)
     search_fields = ('name',)
 
+# Para o Trade, podemos mostrar as suas entradas e saídas diretamente na página de detalhes
 
-@admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
-    search_fields = ('name',)
+
+class TradeEntryInline(admin.TabularInline):
+    model = TradeEntry
+    extra = 1  # Começa com 1 campo extra para adicionar uma nova entrada
+
+
+class TradeTargetInline(admin.TabularInline):
+    model = TradeTarget
+    extra = 1
+
+
+class TradeManualCloseInline(admin.TabularInline):
+    model = TradeManualClose
+    extra = 1
+
+
+@admin.register(Trade)
+class TradeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'symbol', 'side', 'portfolio',
+                    'user', 'is_open', 'net_result')
+    list_filter = ('is_open', 'side', 'user', 'portfolio')
+    search_fields = ('symbol',)
+    # Adicionamos os Inlines para uma gestão mais fácil
+    inlines = [TradeEntryInline, TradeTargetInline, TradeManualCloseInline]
+
+
+@admin.register(JournalNote)
+class JournalNoteAdmin(admin.ModelAdmin):
+    list_display = ('id', 'trade', 'strategy',
+                    'confidence_level', 'created_at')
+    list_filter = ('strategy', 'confidence_level')
+
+
+@admin.register(PortfolioTransaction)
+class PortfolioTransactionAdmin(admin.ModelAdmin):
+    list_display = ('portfolio', 'type', 'value', 'date')
+    list_filter = ('type', 'portfolio')
+
+
+# Também podemos registar os outros modelos se quisermos editá-los individualmente
+admin.site.register(TradeEntry)
+admin.site.register(TradeStop)
+admin.site.register(TradeTarget)
+admin.site.register(TradeManualClose)

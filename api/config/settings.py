@@ -24,7 +24,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Meus Apps
-    'core',
     'dashboard',
     # Apps de terceiros
     'rest_framework',

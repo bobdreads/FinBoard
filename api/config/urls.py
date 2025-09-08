@@ -8,7 +8,6 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('dashboard/', include('dashboard.urls', namespace='dashboard')),
-    path('', include('core.urls')),
 
     # 2. Adicione os endpoints para obter e atualizar tokens
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
