@@ -24,25 +24,27 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class TradeSerializer(serializers.ModelSerializer):
-    # Usamos source para aceder a campos de modelos relacionados
     portfolio_name = serializers.CharField(
         source='portfolio.name', read_only=True)
     user_username = serializers.CharField(
         source='user.username', read_only=True)
+    # Adicionamos um campo para a versão "legível" do status
+    status_display = serializers.CharField(
+        source='get_status_display', read_only=True)
 
     class Meta:
         model = Trade
-        # Lista de campos do novo modelo que queremos expor na API
         fields = [
             'id',
             'symbol',
             'side',
             'fees',
             'net_result',
-            'is_open',
+            'status',  # <-- O campo 'status' (ex: "OPEN")
+            'status_display',  # <-- A versão legível (ex: "Em Aberto")
             'created_at',
-            'portfolio',  # ID do portfólio
+            'portfolio',
             'portfolio_name',
-            'user',  # ID do utilizador
+            'user',
             'user_username',
         ]

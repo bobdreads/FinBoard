@@ -4,7 +4,7 @@ import { refreshToken as refreshAuthToken } from './authService';
 const API_URL = 'http://127.0.0.1:8000';
 
 const apiClient = async (endpoint: string, options: RequestInit = {}) => {
-    let accessToken = localStorage.getItem('accessToken');
+    let accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
 
     // Função interna para fazer o fetch com o token atual
     const performFetch = async (token: string | null) => {

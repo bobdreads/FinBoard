@@ -63,3 +63,25 @@ export const refreshToken = async (refresh: string) => {
 };
 
 // TODO: No futuro, adicionaremos aqui as funções registerUser, refreshToken, etc.
+
+export const registerUser = async (username: string, email: string, password: string) => {
+    const response = await fetch(`${API_URL}/api/register/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        const errorMessage =
+            errorData.username?.[0] ||
+            errorData.password?.[0] ||
+            errorData.email?.[0] ||
+            'Falha no registo. Verifique os seus dados.';
+        throw new Error(errorMessage);
+    }
+
+    return response.json();
+};

@@ -24,7 +24,7 @@ export default function LoginPage() {
         setError(null)
 
         try {
-            await login(data.username, data.password)
+            await login(data.username, data.password, data.rememberMe)
 
             // Se o login for bem-sucedido, redirecionamos para a dashboard
             router.push("/")
